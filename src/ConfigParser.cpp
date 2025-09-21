@@ -118,6 +118,14 @@ void ConfigParser::tokenize(const std::string& content) {
 	    ss << c;
 	}
     }
+
+    if (!ss.str().empty()) {
+	std::string token = ss.str();
+	trim(token);
+	if (!token.empty()) {
+	    tokens.push_back(token);
+	}
+    }
 /*********************************TESTS BLOCK********************************/
 size_t i = 0;
 for (auto it_b = tokens.begin(); it_b != tokens.end(); it_b++) {
