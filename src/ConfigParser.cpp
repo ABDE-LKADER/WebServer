@@ -21,6 +21,9 @@ ServerConfig ConfigParser::parseConfig() {
         throwParseError("Could not read configuration file: " + filename);
     }
 
+    // loop over tokens and do logic
+    
+    
     return server;
 }
 
@@ -35,9 +38,7 @@ bool ConfigParser::readFile() {
 			std::istreambuf_iterator<char>());
 
     file.close();
-
     tokenize(content);
-
     return true;
 }
 
