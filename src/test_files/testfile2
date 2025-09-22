@@ -1,0 +1,14 @@
+hello {
+
+}
+
+server {
+	prot 8080;
+	prot 8081;
+}
+
+server {
+	prot 8080;
+	prot 8081;
+}
+

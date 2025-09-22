@@ -2,13 +2,15 @@
 #define CONFIGPARSER_HPP
 
 #include "ServerConfig.hpp"
+#include <cstddef>
 #include <string>
 #include <vector>
 
 class ConfigParser {
 private:
-    std::string filename;
-    std::vector<std::string> tokens;
+    std::string                 filename;
+    std::vector<std::string>    tokens;
+    size_t                      currentTokenIndex;
 
 public:
     ConfigParser(const std::string& filename);
@@ -17,11 +19,14 @@ public:
     ServerConfig parseConfig();
 
 private:
-    bool readFile();
-    void tokenize(const std::string& content);
+    bool            readFile();
+    void            tokenize(const std::string& content);
 
-    void trim(std::string& str);
-    void throwParseError(const std::string& message);
+    void            incrementToken();
+    std::string     getCurrentToken();
+    bool            hasMoreTokens();
+    void            trim(std::string& str);
+    void            throwParseError(const std::string& message);
 };
 
 #endif

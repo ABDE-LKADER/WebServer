@@ -22,9 +22,44 @@ ServerConfig ConfigParser::parseConfig() {
     }
 
     // loop over tokens and do logic
-    
-    
+    // Look for the first and only server block
+    currentTokenIndex = 0;
+
+    bool serverFound = false;
+    //while (/* there are tokens */) {
+    while (1) {
+	std::string token = getCurrentToken();
+	if (token == "server") {
+	    if (serverFound) {
+		throwParseError("Multiple server blocks found");
+	    }
+	    // parseserver
+	    // set found flag to true
+	    serverFound = true;
+	} else {
+	    incrementToken();
+	}
+    }
+
     return server;
+}
+
+void ConfigParser::incrementToken() {
+    if (!hasMoreTokens()) {
+        throwParseError("Unexpected end of file");
+    }
+    currentTokenIndex++;
+}
+
+std::string ConfigParser::getCurrentToken() {
+    if (!hasMoreTokens()) {
+        throwParseError("Unexpected end of file");
+    }
+    return tokens[currentTokenIndex];
+}
+
+bool ConfigParser::hasMoreTokens() {
+   return currentTokenIndex < tokens.size();
 }
 
 bool ConfigParser::readFile() {
@@ -128,10 +163,10 @@ void ConfigParser::tokenize(const std::string& content) {
 	}
     }
 /*********************************TESTS BLOCK********************************/
-size_t i = 0;
-for (auto it_b = tokens.begin(); it_b != tokens.end(); it_b++) {
-    std::cout << ++i << " : " << *it_b << std::endl;
-}
+// size_t i = 0;
+// for (auto it_b = tokens.begin(); it_b != tokens.end(); it_b++) {
+//     std::cout << ++i << " : " << *it_b << std::endl;
+// }
 /****************************************************************************/
 
 /*********************************TESTS BLOCK********************************/
