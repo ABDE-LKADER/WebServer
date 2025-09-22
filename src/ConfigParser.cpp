@@ -26,25 +26,77 @@ ServerConfig ConfigParser::parseConfig() {
     currentTokenIndex = 0;
 
     bool serverFound = false;
-    //while (/* there are tokens */) {
-    while (1) {
+    while (hasMoreTokens()) {
 	std::string token = getCurrentToken();
 	if (token == "server") {
 	    if (serverFound) {
 		throwParseError("Multiple server blocks found");
 	    }
 	    // parseserver
-	    // set found flag to true
+	    server = parseServer();
+
 	    serverFound = true;
-	} else {
-	    incrementToken();
 	}
+	incrementTokenIndex();
+    }
+
+    if (!serverFound) {
+	throwParseError("No server block found in configuration");
     }
 
     return server;
 }
 
-void ConfigParser::incrementToken() {
+ServerConfig ConfigParser::parseServer() {
+    ServerConfig server;
+
+/*********************************TESTS BLOCK********************************/
+    std::cout << "inside prseServer" << std::endl;
+/****************************************************************************/
+
+    // jump over the "server" token
+    incrementTokenIndex();
+    
+    // Expect opening brace
+    if (getCurrentToken() != "{") {
+        throwParseError("Expected '{' after 'server'");
+    }
+
+    // jump over the "{" token
+    incrementTokenIndex();
+
+    // loop until '}'
+    while (hasMoreTokens() && getCurrentToken() != "}") {
+/*
+    std::vector<std::pair<std::string, int> >	listen; // ip:port pairs
+    std::map<std::string, Location>		locations;
+    std::map<int, std::string>			error_pages;
+    size_t					max_client_body_size;
+
+    Directives:
+	listen 
+	error_page
+	max_client_body_size
+	location
+*/
+    std::string directive = getCurrentToken();
+        
+    if (directive == "listen") {
+	// do logic
+    } else if (directive == "error_page") {
+	// do logic
+    } else if (directive == "max_client_body_size") {
+	// do logic
+    } else if (directive == "location") {
+	// do logic
+    } else {
+	incrementTokenIndex();
+    }
+
+    return server;
+}
+
+void ConfigParser::incrementTokenIndex() {
     if (!hasMoreTokens()) {
         throwParseError("Unexpected end of file");
     }

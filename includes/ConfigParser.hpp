@@ -22,9 +22,12 @@ private:
     bool            readFile();
     void            tokenize(const std::string& content);
 
-    void            incrementToken();
+    ServerConfig    parseServer();
+
+    void            incrementTokenIndex();
     std::string     getCurrentToken();
     bool            hasMoreTokens();
+
     void            trim(std::string& str);
     void            throwParseError(const std::string& message);
 };
