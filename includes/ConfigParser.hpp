@@ -19,17 +19,19 @@ public:
     ServerConfig parseConfig();
 
 private:
-    bool            readFile();
-    void            tokenize(const std::string& content);
+    bool                            readFile();
+    void                            tokenize(const std::string& content);
 
-    ServerConfig    parseServer();
+    ServerConfig                    parseServer();
 
-    void            incrementTokenIndex();
-    std::string     getCurrentToken();
-    bool            hasMoreTokens();
+    std::pair<std::string, int>     parseListenDirective(const std::string& value);
 
-    void            trim(std::string& str);
-    void            throwParseError(const std::string& message);
+    void                            incrementTokenIndex();
+    std::string                     getCurrentToken();
+    bool                            hasMoreTokens();
+
+    void                            trim(std::string& str);
+    void                            throwParseError(const std::string& message);
 };
 
 #endif

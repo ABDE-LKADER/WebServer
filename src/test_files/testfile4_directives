@@ -1,0 +1,4 @@
+server {
+	listen 12123k:99999999
+	# listen ip:port
+}

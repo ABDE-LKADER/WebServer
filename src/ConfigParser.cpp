@@ -1,6 +1,7 @@
 #include "../includes/ConfigParser.hpp"
 #include <cctype>
 #include <cstddef>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -51,7 +52,7 @@ ServerConfig ConfigParser::parseServer() {
     ServerConfig server;
 
 /*********************************TESTS BLOCK********************************/
-    std::cout << "inside prseServer" << std::endl;
+    std::cout << "inside parseServer" << std::endl;
 /****************************************************************************/
 
     // jump over the "server" token
@@ -66,6 +67,9 @@ ServerConfig ConfigParser::parseServer() {
     incrementTokenIndex();
 
     // loop until '}'
+/*********************************TESTS BLOCK********************************/
+    // size_t i = 0;
+/****************************************************************************/
     while (hasMoreTokens() && getCurrentToken() != "}") {
 /*
     std::vector<std::pair<std::string, int> >	listen; // ip:port pairs
@@ -79,31 +83,50 @@ ServerConfig ConfigParser::parseServer() {
 	max_client_body_size
 	location
 */
-    std::string directive = getCurrentToken();
-        
-    if (directive == "listen") {
-	//'listen' 
-	incrementTokenIndex();
-	//'127.0.0.1:8080' ';'
-	std::string listen_value = getCurrentToken();
-/*********************************TESTS BLOCK********************************/
-    size_t i = 0;
-    std::cout << "listen directive number: " << i << " : " \
-	    << listen_value << std::endl;
-/****************************************************************************/
-    } else if (directive == "error_page") {
-	// do logic
-    } else if (directive == "max_client_body_size") {
-	// do logic
-    } else if (directive == "location") {
-	// do logic
-    } else {
-	incrementTokenIndex();
-    }
+	std::string directive = getCurrentToken();
 
-    return server;
+	if (directive == "listen") {
+	    //'listen' '127.0.0.1:8080' ';'
+	    incrementTokenIndex();
+	    //'127.0.0.1:8080' ';'
+	    std::string listen_value = getCurrentToken();
+	    std::pair<std::string, int> addr = parseListenDirective(listen_value);
+
+/*********************************TESTS BLOCK********************************/
+	//    std::cout << "listen directive number: " << ++i << " : " \
+	// << listen_value << std::endl;
+/****************************************************************************/
+	} else if (directive == "error_page") {
+	    // do logic
+	} else if (directive == "max_client_body_size") {
+	    // do logic
+	} else if (directive == "location") {
+	    // do logic
+	} else {
+	    incrementTokenIndex();
+	}
     }
+    return server;
 }
+
+std::pair<std::string, int> ConfigParser::parseListenDirective(const std::string& value) {
+    size_t colon_pos = value.find(':');
+
+    if (colon_pos == std::string::npos) {
+        throwParseError("Invalid listen directive format. Expected ip:port");
+    }
+    
+    std::string ip = value.substr(0, colon_pos);
+    std::string port_str = value.substr(colon_pos + 1);
+
+    int port = std::atoi(port_str.c_str());
+    if (port <= 0 || port > 65535) {
+        throwParseError("Invalid port number: " + port_str);
+    }
+    
+    return std::make_pair(ip, port);
+}
+
 
 void ConfigParser::incrementTokenIndex() {
     if (!hasMoreTokens()) {
