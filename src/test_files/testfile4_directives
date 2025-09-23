@@ -1,4 +1,6 @@
 hello server {
-	listen 12123k:9999               hello
+	max_client_body_size 999;
+	blue ;
+	and flue listen 12123k:9999               ;
 	# listen ip:port
 }

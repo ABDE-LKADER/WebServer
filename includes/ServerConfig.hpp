@@ -2,6 +2,7 @@
 #define SERVERCONFIG_HPP
 
 #include "Location.hpp"
+#include <cstddef>
 #include <map>
 #include <vector>
 #include <string>
@@ -18,7 +19,11 @@ public:
     ~ServerConfig();
 
     // setters
-    void addListen(const std::string& ip, int port);
+    void            addListen(const std::string& ip, int port);
+    void            setMaxClientBodySize(size_t size);
+
+    // getters
+    size_t          getMaxClientBodySize() const;
 
 };
 

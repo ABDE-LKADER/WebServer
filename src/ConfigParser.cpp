@@ -99,15 +99,32 @@ ServerConfig ConfigParser::parseServer() {
 	    // jump over the ';' token
 	    incrementTokenIndex();
 	} else if (directive == "error_page") {
-	    // do logic
+//   # Error pages
+//     error_page 404 /errors/404.html;
+//     error_page 403 /errors/403.html;
+
 	} else if (directive == "max_client_body_size") {
-	    // do logic
+	    incrementTokenIndex();
+            size_t size = static_cast<size_t>(std::atoi(getCurrentToken().c_str()));
+            server.setMaxClientBodySize(size);
+
+	    incrementTokenIndex();
+	    std::string token = getCurrentToken();
+	    if (token != ";") {
+		throwParseError("Expected ';' but found '" + token + "'");
+	    }
+	    // jump over the ';' token
+	    incrementTokenIndex();
+    // do logic
 	} else if (directive == "location") {
 	    // do logic
 	} else {
 	    incrementTokenIndex();
 	}
     }
+/*********************************TESTS BLOCK********************************/
+std::cout << "server getMaxClientBodySize " << server.getMaxClientBodySize() << std::endl;
+/****************************************************************************/
     return server;
 }
 
