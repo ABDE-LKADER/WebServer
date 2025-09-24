@@ -3,7 +3,7 @@
 
 int main(int argc, char* argv[]) {
     try {
-	std::string config_file = "../config/webserv.conf";
+	std::string config_file = "config/webserv.conf";
 
 	if (argc > 1) {
 	    config_file = argv[1];
