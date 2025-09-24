@@ -4,10 +4,12 @@ server {
 		root /root/root/boot;
 		root /root/root/floot;
 		upload_location location;
+		auto_index nooo;
+		auto_index no;
 		auto_index on;
-		#auto_index true;
-		#auto_index yes;
-		#auto_index everthing_else;
+		auto_index true;
+		auto_index yes;
+		auto_index everthing_else;
 	}
     location / {
 		root /something/something_else;
