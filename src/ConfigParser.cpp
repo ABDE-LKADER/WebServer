@@ -181,18 +181,17 @@ Location ConfigParser::parseLocation() {
         
         if (directive == "methods") {
 	    incrementTokenIndex();
-
-	    // TODO: create setMethods() in class location
-
 /*********************************TESTS BLOCK********************************/
-	    std::vector<std::string> string_of_allowed_methods = parseMethodsList();
-	    std::cout << "Block locaiton: mthods are: " << std::endl;
-	    for (size_t i = 0; i < string_of_allowed_methods.size(); i++) {
-		std::cout << i + 1 << ": " << string_of_allowed_methods[i] << " ";
-	    }
-	    std::cout << std::endl;
+// NOTE: if you use this comment the second usage of the function parseMethodsList() below
+	    
+//    std::vector<std::string> string_of_allowed_methods = parseMethodsList();
+//    std::cout << "Block locaiton: mthods are: " << std::endl;
+//    for (size_t i = 0; i < string_of_allowed_methods.size(); i++) {
+//	    std::cout << i + 1 << ": " << string_of_allowed_methods[i] << " ";
+//    }
+//    std::cout << std::endl;
 /****************************************************************************/
-	    // location.setMethods(parseMethodsList());
+	    location.setMethods(parseMethodsList());
 	    // check for ';'
 	    std::string token = getCurrentToken();
 	    if (token != ";") {
@@ -229,9 +228,6 @@ std::vector<std::string> ConfigParser::parseMethodsList() {
 
     while (hasMoreTokens() && getCurrentToken() != ";") {
         std::string method = getCurrentToken();
-	// if (method == ";") {
-	//     break;
-	// }
 	// remove ',' if there is one
 	if (!method.empty() && method[method.size() - 1] == ',') {
 	    method = method.substr(0, method.size() - 1);
