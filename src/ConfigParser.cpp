@@ -166,13 +166,13 @@ Location ConfigParser::parseLocation() {
     incrementTokenIndex();
 
 /* NOTE: location directives: 
-    std::vector<std::string>              methods; // Allowed methods (GET, POST, DELETE)
-    std::string                           root; // Root directory for this location
+    +std::vector<std::string>              methods; // Allowed methods (GET, POST, DELETE)
+    +std::string                           root; // Root directory for this location
     std::pair<int, std::string>           return_directive; // status code, redirect URL
     std::string                           index; // Default file to serve (index.html)
     bool                                  auto_index; // Enable/disable directory listing
     bool                                  upload; // Allow file uploads
-    std::string                           upload_location; // Directory to store uploaded files
+    +std::string                           upload_location; // Directory to store uploaded files
     std::map<std::string, std::string>    cgi; // extension -> cgi path
 */
 
@@ -184,41 +184,61 @@ Location ConfigParser::parseLocation() {
 /*********************************TESTS BLOCK********************************/
 // NOTE: if you use this comment the second usage of the function parseMethodsList() below
 	    
-//    std::vector<std::string> string_of_allowed_methods = parseMethodsList();
-//    std::cout << "Block locaiton: mthods are: " << std::endl;
-//    for (size_t i = 0; i < string_of_allowed_methods.size(); i++) {
-//	    std::cout << i + 1 << ": " << string_of_allowed_methods[i] << " ";
-//    }
-//    std::cout << std::endl;
+   // std::vector<std::string> string_of_allowed_methods = parseMethodsList();
+   // std::cout << "Block locaiton: mthods are: " << std::endl;
+   // for (size_t i = 0; i < string_of_allowed_methods.size(); i++) {
+   //   std::cout << i + 1 << ": " << string_of_allowed_methods[i] << " ";
+   // }
+   // std::cout << std::endl;
 /****************************************************************************/
 	    location.setMethods(parseMethodsList());
-	    // check for ';'
 	    expectToken(";");
         } else if (directive == "root") {
 	    incrementTokenIndex();
-            
+            location.setRoot(getCurrentToken());
+/*********************************TESTS BLOCK********************************/
+// std::cout << "location.root == " << location.getRoot() << std::endl;
+/****************************************************************************/
+	    incrementTokenIndex();
+            expectToken(";");
         } else if (directive == "return") {
             
         } else if (directive == "index") {
             
         } else if (directive == "auto_index") {
-            
+	    incrementTokenIndex();
+            std::string value = getCurrentToken();
+            location.setAutoIndex(value == "on" || value == "yes" || value == "true");
+/*********************************TESTS BLOCK********************************/
+    std::cout << "location.auto_index == " << 
+		(location.getAutoIndex() ? "yes" : "no") << std::endl;
+/****************************************************************************/
+	    incrementTokenIndex();
+            expectToken(";");
         } else if (directive == "upload") {
             
         } else if (directive == "upload_location") {
-            
+	    incrementTokenIndex();
+	    location.setUploadLocation(getCurrentToken());
+/*********************************TESTS BLOCK********************************/
+// std::cout << "location.upload_location == " << location.getUploadLocation() << std::endl;
+/****************************************************************************/
+	    incrementTokenIndex();
+            expectToken(";");
         } else if (directive == "cgi") {
             
         } else {
-            
+	    incrementTokenIndex();
         }
     }
 
+    expectToken("}");
     return location;
 }
 
 void ConfigParser::expectToken(const std::string& expected) {
     std::string token = getCurrentToken();
+
     if (token != expected) {
 	throwParseError("Expected '" + expected + "' but found '" + token + "'");
     }
@@ -227,7 +247,7 @@ void ConfigParser::expectToken(const std::string& expected) {
 
 
 std::vector<std::string> ConfigParser::parseMethodsList() {
-    //NOTE: e.g.: "POST," "DELETE" "," "get" ";"
+    //NOTE: e.g.: "POST," "DELETE" "," "get" "GET" ";"
     std::vector<std::string> methods;
 
     while (hasMoreTokens() && getCurrentToken() != ";") {

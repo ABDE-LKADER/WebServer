@@ -21,7 +21,17 @@ public:
     ~Location();
 
     // Setters
-    void    setMethods(const std::vector<std::string>& methods);
+    void                        setMethods(const std::vector<std::string>& methods);
+    void                        setRoot(const std::string& root);
+    void                        setUploadLocation(const std::string& location);
+    void                        setAutoIndex(bool auto_index);
+
+    // Getters
+    const std::string&          getRoot() const;
+    const std::string&          getUploadLocation() const;
+    bool                        getAutoIndex() const;
+
+
 };
 
 #endif
