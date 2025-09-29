@@ -2,6 +2,7 @@
 #include <vector>
 #include "../includes/ConfigParser.hpp"
 #include "../includes/ServerConfig.hpp"
+#include "../includes/HttpResponseBuilder.hpp"
 
 void printServers(const std::vector<ServerConfig>& servers);
 
@@ -16,9 +17,21 @@ int main(int argc, char* argv[]) {
 	ConfigParser parser(config_file);
 	std::vector<ServerConfig> servers = parser.parseConfig();
 
+//NOTE: Building response
+        HttpRequestData request;
+        // Makeshift request
+        request.method = "GET";
+        request.path = "/";
+        request.headers["head1"] = "head_one";
+
+
+    //TODO: need a mechanism to determin which server to use
+        HttpResponseBuilder builder(servers[0]);
+        // HttpResponse response = builder.buildResponse(request);
+
 /*********************************TESTS BLOCK********************************/
 /************************* print servers after parse ************************/
-	printServers(servers);
+	// printServers(servers);
 /****************************************************************************/
 
     } catch (const std::exception& e) {
