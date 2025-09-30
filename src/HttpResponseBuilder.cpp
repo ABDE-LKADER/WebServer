@@ -7,7 +7,7 @@ HttpResponseBuilder::HttpResponseBuilder(const ServerConfig& config):
 HttpResponseBuilder::~HttpResponseBuilder() {
 }
 
-HttpResponse HttpResponseBuilder::buildResponse(const HttpRequestData& request, Client& client) {
+HttpResponse HttpResponseBuilder::buildResponse(Client& client) {
 
 /*
     HttpRequestData request;
@@ -39,9 +39,9 @@ HttpResponse HttpResponseBuilder::buildResponse(const HttpRequestData& request, 
     // find location
     //Location location = server_config.getLocations()
 
-    if (request.method == "GET") {
+    if (client.request.method == "GET") {
         //TODO: function that handles get
-        return handleGet(request, client.location);
+        return handleGet(client.request, client.location);
     }
 
 
@@ -51,12 +51,13 @@ HttpResponse HttpResponseBuilder::buildResponse(const HttpRequestData& request, 
     return response;
 }
 
-HttpResponse HttpResponseBuilder::handleGet(const HttpRequestData& request, const Location& location) {
+HttpResponse HttpResponseBuilder::handleGet(const HttpRequest& request, const Location& location) {
     std::string full_path = request.full_path;
+    //TODO: create class to do checks on static files
    
 /******** //NOTE: TESTING *********/
     HttpResponse response;
-    response.setStatusCode(200);
+    response.setStatusCode(400);
     return response;
 /**********************************/
 }

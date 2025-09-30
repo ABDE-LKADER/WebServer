@@ -21,12 +21,6 @@ int main(int argc, char* argv[]) {
 
 /*********************************TESTS BLOCK********************************/
 //NOTE: Building response
-        HttpRequestData request;
-        // Makeshift request
-        request.method = "GET";
-        request.full_path = "/";
-        request.headers["head1"] = "head_one";
-
 
     //TODO: need a mechanism to determin which server to use
         HttpResponseBuilder builder(servers[0]);
@@ -36,7 +30,7 @@ int main(int argc, char* argv[]) {
         // Makeshift client
         Client test_client_001;
         std::vector<std::string> methods;
-        methods.push_back("GET");
+        // methods.push_back("GET");
         methods.push_back("POST");
 
         test_client_001.location.setMethods(methods);
@@ -48,8 +42,9 @@ int main(int argc, char* argv[]) {
         test_client_001.location.setReturn(301, "https://example.com");
         test_client_001.location.addCgi(".php", "/usr/bin/php-cgi");
 
+        // test_client_001.request.method = "GET";
 
-        HttpResponse response = builder.buildResponse(request, test_client_001);
+        HttpResponse response = builder.buildResponse(test_client_001);
 
         /********TESTS BLOCK*********/
         // Makeshift response
