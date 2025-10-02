@@ -15,6 +15,14 @@ void HttpResponse::setStatusMessage(const std::string& message) {
     status_message = message;
 }
 
+void HttpResponse::setContentType(const std::string& type) {
+    setHeader("Content-Type", type);
+}
+
+void HttpResponse::setHeader(const std::string& name, const std::string& value) {
+    headers[name] = value;
+}
+
 std::string HttpResponse::toString() const {
     std::stringstream ss;
     
@@ -22,12 +30,16 @@ std::string HttpResponse::toString() const {
     ss << http_version << " " << status_code << " " << status_message << "\r\n";
     
     // Headers
-    ss << "holder_name: " << "holder_value" << "\r\n";
+    for (std::map<std::string, std::string>::const_iterator it = headers.begin();
+         it != headers.end(); ++it) {
+        ss << it->first << ": " << it->second << "\r\n";
+    }
+
     // Empty line between headers and body
     ss << "\r\n";
     // Body
-    ss << "holeder : This is the body ......";
-    
+    ss << body;
+
     return ss.str();
 }
 
@@ -61,5 +73,24 @@ std::string HttpResponse::getStatusText(int code) {
         
         default: return "Unknown";
     }
+}
+
+void HttpResponse::setContentLength(size_t length) {
+    std::stringstream ss;
+    ss << length;
+    setHeader("Content-Length", ss.str());
+}
+
+void HttpResponse::writeFileToBuffer(std::string full_path) {
+    std::ifstream file(full_path.c_str());
+    if (!file.is_open()) {
+        body = "";
+    }
+    
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    file.close();
+    
+    body = buffer.str();
 }
 

@@ -1,5 +1,6 @@
 #include "../includes/HttpResponseBuilder.hpp"
 #include <algorithm>
+#include <filesystem>
 
 HttpResponseBuilder::HttpResponseBuilder(const ServerConfig& config):
     server_config (config) {
@@ -58,10 +59,13 @@ HttpResponse HttpResponseBuilder::handleGet(const HttpRequest& request, const Lo
     std::string full_path = request.full_path;
 
 /******** //NOTE: TESTING *********/
-full_path = "./test_files/regular_readable_file";
-// full_path = "./test_files/";
+// full_path = "./test_files/regular_readable_file";
 // full_path = "./test_files/no_permissions";
-
+// full_path = "./test_files/file.txt";
+// full_path = "./test_files/no_exist";
+// full_path = "./test_files";
+full_path = "./test_files/";
+// full_path = "./test_files/index.html";
 /**********************************/
 
 /*
@@ -79,36 +83,48 @@ full_path = "./test_files/regular_readable_file";
     // Check if path exists
     if (! static_handler.fileExists(full_path)) {
         response.setStatusCode(404);
+        response.setContentType("text/html");
+        response.writeFileToBuffer("../errors/404.html");
         return response;
     }
 
     // Check if it's a directory
     if (static_handler.isDirectory(full_path)) {
-        /******** //NOTE: TESTING *********/
-            response.setStatusCode(901);
-            response.setStatusMessage("test: file is a directory");
-            return response;
-        /**********************************/
+        // Try to serve index file if configured
+        if (!location.getIndex().empty()) {
+            std::string index_path = full_path;
+            if (index_path[index_path.length() - 1] != '/') {
+                index_path += "/";
+            }
+            index_path += location.getIndex();
+            if (static_handler.fileExists(index_path) && !static_handler.isDirectory(index_path)) {
+                response.setStatusCode(200);
+                response.setContentType(static_handler.getContentType(index_path));
+                response.writeFileToBuffer(index_path);
+                return response;
+            }
+        }
+        // Check if auto_index is enabled
+        //TODO:/|\/|\/|\/|\/|\/|\/|\
+
     }
 
     // Check if not readable
     if (! static_handler.isReadable(full_path)) {
-        /******** //NOTE: TESTING *********/
-            response.setStatusCode(900);
-            response.setStatusMessage("test: file is not readable");
-            return response;
-        /**********************************/
+        response.setStatusCode(403);
+        response.setContentType("text/html");
+        response.writeFileToBuffer("../errors/403.html");
+        return response;
     }
 
     /******** //NOTE: TESTING *********/
-        std::cout << "file is readable returning a 200 OK page\n\n";
-        response.setStatusCode(200);
-        return response;
+    std::cout << "file is readable returning a 200 OK page\n\n";
     /**********************************/
+    response.setStatusCode(200);
+    response.setContentType(static_handler.getContentType(full_path));
+    // this will write to the response.body string at the moment
+    response.writeFileToBuffer(full_path);
 
-/******** //NOTE: TESTING *********/
-    response.setStatusCode(900);
     return response;
-/**********************************/
 }
 

@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
 /*********************************TESTS BLOCK********************************/
 //NOTE: Building response
 
-    //TODO: need a mechanism to determin which server to use
+    //TODO: need a mechanism to determine which server to use
         HttpResponseBuilder builder(servers[0]);
     //NOTE: At the time let's consider that the line above is done
     //NOTE: my goal at the moment is to generate a response
