@@ -5,8 +5,8 @@
 #include "../includes/ServerConfig.hpp"
 #include "../includes/StaticFileHandler.hpp"
 #include "../includes/Client.hpp"
-#include <string>
-#include <map>
+
+#include <iostream>
 
 class HttpResponseBuilder {
 private:

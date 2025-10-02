@@ -1,4 +1,5 @@
 #include "../includes/HttpResponseBuilder.hpp"
+#include <algorithm>
 
 HttpResponseBuilder::HttpResponseBuilder(const ServerConfig& config):
     server_config (config) {
@@ -57,7 +58,10 @@ HttpResponse HttpResponseBuilder::handleGet(const HttpRequest& request, const Lo
     std::string full_path = request.full_path;
 
 /******** //NOTE: TESTING *********/
-full_path = "./test_files/path_test_in_get";
+full_path = "./test_files/regular_readable_file";
+// full_path = "./test_files/";
+// full_path = "./test_files/no_permissions";
+
 /**********************************/
 
 /*
@@ -67,7 +71,9 @@ full_path = "./test_files/path_test_in_get";
     Check if it's a directory
         if index --> serve index
         if auto_index --> list files in dir
-    else return error page
+    Check if ! readable
+        403 "Forbidden"
+    server regular file
 */
 
     // Check if path exists
@@ -76,9 +82,30 @@ full_path = "./test_files/path_test_in_get";
         return response;
     }
 
+    // Check if it's a directory
+    if (static_handler.isDirectory(full_path)) {
+        /******** //NOTE: TESTING *********/
+            response.setStatusCode(901);
+            response.setStatusMessage("test: file is a directory");
+            return response;
+        /**********************************/
+    }
 
-    
-   
+    // Check if not readable
+    if (! static_handler.isReadable(full_path)) {
+        /******** //NOTE: TESTING *********/
+            response.setStatusCode(900);
+            response.setStatusMessage("test: file is not readable");
+            return response;
+        /**********************************/
+    }
+
+    /******** //NOTE: TESTING *********/
+        std::cout << "file is readable returning a 200 OK page\n\n";
+        response.setStatusCode(200);
+        return response;
+    /**********************************/
+
 /******** //NOTE: TESTING *********/
     response.setStatusCode(900);
     return response;

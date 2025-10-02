@@ -3,6 +3,7 @@
 
 #include <sys/stat.h>
 #include <string>
+#include <unistd.h>
 
 class StaticFileHandler {
 private:
@@ -11,8 +12,9 @@ public:
     StaticFileHandler();
     ~StaticFileHandler();
     
-    // Check if file exists
     bool fileExists(const std::string& path) const;
+    bool isDirectory(const std::string& path) const;
+    bool isReadable(const std::string& path) const;
 
 };
 
