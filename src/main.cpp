@@ -36,9 +36,10 @@ int main(int argc, char* argv[]) {
         test_client_001.location.setMethods(methods);
         test_client_001.location.setRoot("/var/www/html");
         test_client_001.location.setUploadLocation("/var/www/uploads");
-        test_client_001.location.setAutoIndex(true);
+        test_client_001.location.setAutoIndex(false);
+        // test_client_001.location.setAutoIndex(true);
         test_client_001.location.setUpload(true);
-        test_client_001.location.setIndex("index.html");
+        // test_client_001.location.setIndex("index.html");
         test_client_001.location.setReturn(301, "https://example.com");
         test_client_001.location.addCgi(".php", "/usr/bin/php-cgi");
 
