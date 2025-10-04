@@ -36,6 +36,8 @@ public:
     static      std::string getStatusText(int code);
     void        setContentLength(size_t length);
     void        writeFileToBuffer(std::string full_path);
+    void        writeStringToBuffer(std::string str);
+
 
 };
 

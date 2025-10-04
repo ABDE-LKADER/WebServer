@@ -18,9 +18,12 @@ public:
     HttpResponseBuilder(const ServerConfig& config);
     ~HttpResponseBuilder();
 
-    HttpResponse buildResponse(Client& client);
+    std::string     generateDirectoryListing(const std::string& path) const;
 
-    HttpResponse handleGet(const HttpRequest& request, const Location& location);
+    HttpResponse    handleAutoIndex(const std::string& path) const;
+    HttpResponse    buildResponse(Client& client);
+
+    HttpResponse    handleGet(const HttpRequest& request, const Location& location);
 };
 
 #endif

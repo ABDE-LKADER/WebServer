@@ -1,6 +1,5 @@
 #include "../includes/HttpResponseBuilder.hpp"
-#include <algorithm>
-#include <filesystem>
+#include <sstream>
 
 HttpResponseBuilder::HttpResponseBuilder(const ServerConfig& config):
     server_config (config) {
@@ -8,6 +7,39 @@ HttpResponseBuilder::HttpResponseBuilder(const ServerConfig& config):
 
 HttpResponseBuilder::~HttpResponseBuilder() {
 }
+
+std::string HttpResponseBuilder::generateDirectoryListing(const std::string& path) const {
+    std::stringstream ss;
+
+    /******** // NOTE: TESTING *********/
+    ss << "<html>";
+    ss << "<head><title>Index of /files/</title></head>";
+    ss << "<body bgcolor=\"white\">";
+    ss << "<h1>Index of /files/</h1><hr><pre>";
+    ss << "<a href=\"../\">../</a>\n";
+    ss << "<a href=\"document.txt\">document.txt</a>\n";
+    ss << "<a href=\"image1.png\">image1.png</a>\n";
+    ss << "<a href=\"image2.jpg\">image2.jpg</a>\n";
+    ss << "<a href=\"subdir/\">subdir/</a>\n";
+    ss << "</pre><hr>";
+    ss << "</body>";
+    ss << "</html>";
+    /**********************************/
+
+    return ss.str();
+}
+
+HttpResponse HttpResponseBuilder::handleAutoIndex(const std::string& path) const {
+    HttpResponse response;
+    
+    std::string listing = generateDirectoryListing(path);
+    response.setStatusCode(200);
+    response.setContentType("text/html");
+    response.writeStringToBuffer(listing);
+    
+    return response;
+}
+
 
 HttpResponse HttpResponseBuilder::buildResponse(Client& client) {
 
@@ -118,7 +150,12 @@ full_path = "./test_files";
         }
         // Check if auto_index is enabled
         if (location.getAutoIndex()) {
+            /******** //NOTE: TESTING *********/
+            std::cout << "AutoIndex is on\n";
+            /**********************************/
             //TODO: AutoIndex method
+            response = handleAutoIndex(full_path);
+            return response;
         } else {
             /******** //NOTE: TESTING *********/
             std::cout << "AutoIndex is off, returning page 403, Forbidden\n";
