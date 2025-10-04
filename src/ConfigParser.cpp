@@ -348,7 +348,7 @@ std::vector<int> ConfigParser::parseErrorCodes() {
         
         int code = std::atoi(token.c_str());
         
-        if (code >= 400 && code < 500) {
+        if (code >= 400 && code < 600) {
             codes.push_back(code);
         } else {
             throwParseError("Error code is out of range (must be 4xx)");

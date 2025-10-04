@@ -1,7 +1,10 @@
 #include <iostream>
 #include <vector>
-#include "ConfigParser.hpp"
-#include "ServerConfig.hpp"
+#include "../includes/ConfigParser.hpp"
+#include "../includes/ServerConfig.hpp"
+#include "../includes/HttpResponseBuilder.hpp"
+#include "../includes/HttpResponse.hpp"
+#include "../includes/Client.hpp"
 
 void printServers(const std::vector<ServerConfig>& servers);
 
@@ -17,8 +20,46 @@ int main(int argc, char* argv[]) {
 	std::vector<ServerConfig> servers = parser.parseConfig();
 
 /*********************************TESTS BLOCK********************************/
+//NOTE: Building response
+
+    //TODO: need a mechanism to determine which server to use
+        HttpResponseBuilder builder(servers[0]);
+    //NOTE: At the time let's consider that the line above is done
+    //NOTE: my goal at the moment is to generate a response
+        
+        // Makeshift client
+        Client test_client_001;
+        std::vector<std::string> methods;
+        // methods.push_back("GET");
+        methods.push_back("POST");
+
+        test_client_001.location.setMethods(methods);
+        test_client_001.location.setRoot("/var/www/html");
+        test_client_001.location.setUploadLocation("/var/www/uploads");
+        // test_client_001.location.setAutoIndex(false);
+        test_client_001.location.setAutoIndex(true);
+        test_client_001.location.setUpload(true);
+        // test_client_001.location.setIndex("index.html");
+        test_client_001.location.setReturn(301, "https://example.com");
+        test_client_001.location.addCgi(".php", "/usr/bin/php-cgi");
+
+        test_client_001.request.method = "GET";
+
+        HttpResponse response = builder.buildResponse(test_client_001);
+
+        /********TESTS BLOCK*********/
+        // Makeshift response
+        // HttpResponse response;
+        // response.setStatusCode(400);
+        //
+        std::cout << response.toString() << std::endl;
+        /****************************/
+/****************************************************************************/
+
+
+/*********************************TESTS BLOCK********************************/
 /************************* print servers after parse ************************/
-	printServers(servers);
+	// printServers(servers);
 /****************************************************************************/
 
     } catch (const std::exception& e) {

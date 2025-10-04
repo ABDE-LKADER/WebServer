@@ -39,5 +39,3 @@ const std::map<int, std::string>& ServerConfig::getErrorPages() const {
 size_t ServerConfig::getMaxClientBodySize() const {
     return max_client_body_size;
 }
-
-
