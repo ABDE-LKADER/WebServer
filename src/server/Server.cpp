@@ -1,17 +1,17 @@
 # include "Server.hpp"
 
-Server::Server( void ) : epollfd(ERROR) { }
+Server::Server( void ) : epoll_fd(ERROR) { }
 
 Server::~Server( void ) {
 	std::cout << "Server Closed ...\n";
 
 	for (size_t index = 0; index < listeners.size(); index++)
 		close(listeners[index]);
-	if (epollfd != ERROR) close(epollfd);
+	if (epoll_fd != ERROR) close(epoll_fd);
 }
 
 void	Server::create_epoll( void ) {
-	if ((epollfd = epoll_create(MAX_EVENTS)) == ERROR)
+	if ((epoll_fd = epoll_create(MAX_EVENTS)) == ERROR)
 		throw std::runtime_error("<epoll_create> " + std::string(strerror(errno)));
 }
 
@@ -21,7 +21,7 @@ void	Server::socket_control( int fd, int mode, int op ) {
 	bzero(&ev, sizeof(event_t));
 	ev.events = mode, ev.data.fd = fd;
 
-	if (epoll_ctl(epollfd, op, ev.data.fd, &ev) == ERROR)
+	if (epoll_ctl(epoll_fd, op, ev.data.fd, &ev) == ERROR)
 		throw std::runtime_error("<epoll_ctl> " + std::string(strerror(errno)));
 }
 
@@ -56,28 +56,29 @@ void	Server::run( void )
 	event_t			events[MAX_EVENTS];
 
 	while ( true ) {
-		if ((nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1)) == ERROR)
-			perror("Epoll_wait");
+		if ((nfds = epoll_wait(epoll_fd, events, MAX_EVENTS, -1)) == ERROR)
+			throw std::runtime_error("<epoll_wait> " + std::string(strerror(errno)));
 
 		for (int curr_ev = 0; curr_ev < nfds; curr_ev++) {
-			event_t							&live_ev = events[curr_ev];
-			int								live_sock = live_ev.data.fd;
-			std::vector<int>::iterator		server_soc = find(listeners.begin(), listeners.end(), live_sock);
+			int			live_sock = events[curr_ev].data.fd;
 
-			if (server_soc != listeners.end()) {
-				int		conn_sock = accept(*server_soc, NULL, NULL);
+			if (find(listeners.begin(), listeners.end(), live_sock) != listeners.end()) {
+				int		conn_sock = accept(live_sock, NULL, NULL);
+
+				Connection		client(conn_sock);
 
 				fcntl(conn_sock, F_SETFL, O_NONBLOCK);
+				connections.insert(std::make_pair(conn_sock, &client));
 				socket_control(conn_sock, EPOLLIN, EPOLL_CTL_ADD);
 				continue ;
 			}
 
-			if (live_ev.events & EPOLLIN) {
+			if (events[curr_ev].events & EPOLLIN) {
 				socket_control(live_sock, EPOLLOUT, EPOLL_CTL_MOD);
 				continue ;
 			}
 
-			if (live_ev.events & EPOLLOUT)
+			if (events[curr_ev].events & EPOLLOUT)
 				response(live_sock);
 		}
 	}

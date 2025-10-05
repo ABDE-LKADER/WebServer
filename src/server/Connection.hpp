@@ -4,21 +4,30 @@
 # include "core.hpp"
 # include "Buffer.hpp"
 
-enum status_e { READING_HEADERS, READING_BODY,
+enum state_e { READING_HEADERS, READING_BODY,
 				READY_TO_WRITE, WRITING, CLOSING };
 
 class Connection
 {
 	public:
-		Connection( void );
+		Connection( int );
 		~Connection( void );
 
+		int			getCode( void );
+		state_e		getState( void );
+
+		void		setCode( int );
+		void		setState( state_e );
+
 	private:
+		int			soc;
 		int			code;
-		int			status;
-		int			conn_sock;
+		state_e		state;
 		Buffer		sending;
-		Buffer		receving;
+		Buffer		receiving;
+		size_t		write_pos;
+		bool		peer_half_closed;
+		bool		want_close;
 };
 
 #endif

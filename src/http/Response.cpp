@@ -60,6 +60,6 @@ void Server::response(int live_sock) {
 		off += (size_t)n;
 	}
 
-	epoll_ctl(epollfd, EPOLL_CTL_DEL, live_sock, NULL);
+	epoll_ctl(epoll_fd, EPOLL_CTL_DEL, live_sock, NULL);
 	close(live_sock);
 }

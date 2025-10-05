@@ -26,12 +26,14 @@
 # include <bitset>
 # include <algorithm>
 # include <sstream>
+# include <map>
 
 // ------------------------- Webserv includes -------------------------//
 
 # include "ServerConfig.hpp"
 # include "ConfigParser.hpp"
 # include "Server.hpp"
+# include "Buffer.hpp"
 
 // ------------------------- Webserv Macros -------------------------//
 

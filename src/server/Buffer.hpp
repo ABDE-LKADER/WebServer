@@ -1,8 +1,6 @@
 #ifndef BUFFER_HPP
 # define BUFFER_HPP
 
-# include "core.hpp"
-
 class Buffer
 {
 	public:

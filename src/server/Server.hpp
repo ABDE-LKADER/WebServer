@@ -3,10 +3,12 @@
 
 # include "core.hpp"
 # include "Listener.hpp"
+# include "Connection.hpp"
 
 typedef struct epoll_event event_t;
 typedef std::vector<std::pair<std::string, std::string> > vector_pairs;
 
+class Connection;
 class ServerConfig;
 
 class Server
@@ -15,17 +17,18 @@ class Server
 		Server( void );
 		~Server( void );
 		
-		void				run( void );
-		void				create( std::vector<ServerConfig> & );
+		void						run( void );
+		void						create( std::vector<ServerConfig> & );
 
 	private:
-		void				create_epoll( void );
-		void				socket_control( int , int , int );
+		void						create_epoll( void );
+		void						socket_control( int , int , int );
 
-		void				response( int );		// for test response
+		void						response( int );		// for test response
 
-		int					epollfd;				// Epoll file descriptor
-		std::vector<int>	listeners;
+		int							epoll_fd;
+		std::vector<int>			listeners;
+		std::map<int, Connection*>	connections;
 };
 
 #endif
