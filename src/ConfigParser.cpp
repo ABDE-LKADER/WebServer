@@ -132,7 +132,7 @@ ServerConfig ConfigParser::parseServer() {
 	    Location location = parseLocation();
 	    server.addLocation(path, location);
 	} else {
-	    incrementTokenIndex();
+	    throwParseError("Unknown directive in server block: '" + directive + "'");
 	}
     }
 /*********************************TESTS BLOCK********************************/
@@ -271,11 +271,16 @@ Location ConfigParser::parseLocation() {
 	    incrementTokenIndex();
 	    expectToken(";");
 	} else {
-	    incrementTokenIndex();
+	    throwParseError("Unknown directive in location block: '" + directive + "'");
         }
     }
 
     expectToken("}");
+
+    if (location.getRoot().empty()) {
+	throwParseError("Location block must have a 'root' directive");
+    }
+
     return location;
 }
 	    
