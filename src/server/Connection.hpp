@@ -2,7 +2,7 @@
 # define CONNECTION_HPP
 
 # include "core.hpp"
-# include "Buffer.hpp"
+# include "Request.hpp"
 
 enum state_e { READING_HEADERS, READING_BODY,
 				READY_TO_WRITE, WRITING, CLOSING };
@@ -10,24 +10,30 @@ enum state_e { READING_HEADERS, READING_BODY,
 class Connection
 {
 	public:
-		Connection( int );
+		Connection( void );
 		~Connection( void );
 
-		int			getCode( void );
-		state_e		getState( void );
+		Connection( int );
 
-		void		setCode( int );
-		void		setState( state_e );
+		int				getSoc( void );
+		int				getCode( void );
+		state_e			getState( void );
+
+		void			setCode( int );
+		void			setState( state_e );
+
+		void			requestProssessing( void );
+		void			buildResponseMinimal( void );		// for test response
 
 	private:
-		int			soc;
-		int			code;
-		state_e		state;
-		Buffer		sending;
-		Buffer		receiving;
-		size_t		write_pos;
-		bool		peer_half_closed;
-		bool		want_close;
+		int				soc;
+		int				code;
+		state_e			state;
+
+		std::string		recv;
+		std::string		send;
+
+		Request			request;
 };
 
 #endif

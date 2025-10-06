@@ -1,4 +1,5 @@
-# pragma once
+#ifndef CORE_HPP
+# define CORE_HPP
 
 // ------------------------- System includes -------------------------//
 
@@ -33,17 +34,20 @@
 # include "ServerConfig.hpp"
 # include "ConfigParser.hpp"
 # include "Server.hpp"
-# include "Buffer.hpp"
+
+// ------------------------- Webserv Typedefs -------------------------//
+
+typedef std::vector< std::pair<std::string, std::string> > vector_pairs;
 
 // ------------------------- Webserv Macros -------------------------//
 
-# define BUF_SIZE 10
-# define PORT_NUM 50002
+# define BUF_SIZE 2048
 # define MAX_EVENTS 1024
 # define TIMEOUT 1000
-
 # define ERROR -1
 
 // ------------------------- Webserv Outils -------------------------//
 
 void	printServers( const std::vector<ServerConfig> &servers );
+
+#endif

@@ -2,8 +2,8 @@
 
 # include "core.hpp"
 
-void Server::response(int live_sock) {
-	std::cout << "Client Socket: " << live_sock << std::endl;
+void	Connection::buildResponseMinimal( void ) {
+	std::cout << "Client Socket: " << soc << std::endl;
 
 	// Body
 	const char body[] =
@@ -44,10 +44,11 @@ void Server::response(int live_sock) {
 	if (header_len < 0) header_len = 0;
 	if (header_len > (int)sizeof(header)) header_len = (int)sizeof(header);
 
+	state = WRITING;
 	// Send header (handle partial writes)
 	size_t off = 0;
 	while (off < (size_t)header_len) {
-		ssize_t n = send(live_sock, header + off, (size_t)header_len - off, MSG_NOSIGNAL);
+		ssize_t n = ::send(soc, header + off, (size_t)header_len - off, MSG_NOSIGNAL);
 		if (n <= 0) break;
 		off += (size_t)n;
 	}
@@ -55,11 +56,8 @@ void Server::response(int live_sock) {
 	// Send body (handle partial writes)
 	off = 0;
 	while (off < body_len) {
-		ssize_t n = send(live_sock, body + off, body_len - off, MSG_NOSIGNAL);
+		ssize_t n = ::send(soc, body + off, body_len - off, MSG_NOSIGNAL);
 		if (n <= 0) break;
 		off += (size_t)n;
 	}
-
-	epoll_ctl(epoll_fd, EPOLL_CTL_DEL, live_sock, NULL);
-	close(live_sock);
 }
