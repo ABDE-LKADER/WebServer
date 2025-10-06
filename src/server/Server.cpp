@@ -25,6 +25,24 @@ void	Server::socket_control( int fd, int mode, int op ) {
 		throw std::runtime_error("<epoll_ctl> " + std::string(strerror(errno)));
 }
 
+void	Server::close_connection( int sock ) {
+	epoll_ctl(epoll_fd, EPOLL_CTL_DEL, sock, NULL);
+	connections.erase(sock);
+	close(sock);
+}
+
+void	Server::accept_connection( int sock )
+{
+	int		conn_sock = accept(sock, NULL, NULL);
+
+	if (conn_sock == ERROR)
+		throw std::runtime_error("<accept> " + std::string(strerror(errno)));
+
+	fcntl(conn_sock, F_SETFL, O_NONBLOCK);
+	connections[conn_sock] = Connection(conn_sock);
+	socket_control(conn_sock, EPOLLIN | EPOLLRDHUP, EPOLL_CTL_ADD);
+}
+
 void	Server::create( std::vector<ServerConfig> &servers ) {
 	create_epoll();
 
@@ -60,26 +78,30 @@ void	Server::run( void )
 			throw std::runtime_error("<epoll_wait> " + std::string(strerror(errno)));
 
 		for (int curr_ev = 0; curr_ev < nfds; curr_ev++) {
-			int			live_sock = events[curr_ev].data.fd;
+			int			curr_sock = events[curr_ev].data.fd;
 
-			if (find(listeners.begin(), listeners.end(), live_sock) != listeners.end()) {
-				int		conn_sock = accept(live_sock, NULL, NULL);
+			if (find(listeners.begin(), listeners.end(), curr_sock) != listeners.end()) {
+				accept_connection(curr_sock);
+				continue ;
+			}
 
-				Connection		client(conn_sock);
-
-				fcntl(conn_sock, F_SETFL, O_NONBLOCK);
-				connections.insert(std::make_pair(conn_sock, &client));
-				socket_control(conn_sock, EPOLLIN, EPOLL_CTL_ADD);
+			if (events[curr_ev].events & (EPOLLERR | EPOLLHUP | EPOLLRDHUP)) {
+				close_connection(curr_sock);
 				continue ;
 			}
 
 			if (events[curr_ev].events & EPOLLIN) {
-				socket_control(live_sock, EPOLLOUT, EPOLL_CTL_MOD);
+				if (connections[curr_sock].getState() == READING_HEADERS)
+					connections[curr_sock].requestProssessing();
 				continue ;
 			}
 
-			if (events[curr_ev].events & EPOLLOUT)
-				response(live_sock);
+			if (events[curr_ev].events & EPOLLOUT) {
+				if (connections[curr_sock].getState() == READY_TO_WRITE)
+					connections[curr_sock].buildResponseMinimal();
+				if (connections[curr_sock].getState() == CLOSING)
+					close_connection(curr_sock);
+			}
 		}
 	}
 }

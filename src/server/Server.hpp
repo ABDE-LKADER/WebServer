@@ -6,7 +6,6 @@
 # include "Connection.hpp"
 
 typedef struct epoll_event event_t;
-typedef std::vector<std::pair<std::string, std::string> > vector_pairs;
 
 class Connection;
 class ServerConfig;
@@ -23,12 +22,12 @@ class Server
 	private:
 		void						create_epoll( void );
 		void						socket_control( int , int , int );
-
-		void						response( int );		// for test response
+		void						accept_connection( int );
+		void						close_connection( int );
 
 		int							epoll_fd;
 		std::vector<int>			listeners;
-		std::map<int, Connection*>	connections;
+		std::map<int, Connection>	connections;
 };
 
 #endif
