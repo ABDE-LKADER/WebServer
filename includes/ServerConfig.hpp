@@ -10,9 +10,9 @@
 class ServerConfig {
 private:
     std::vector<std::pair<std::string, std::string> >   listen; // ip:port pairs
-    std::map<std::string, Location>             locations;
-    std::map<int, std::string>                  error_pages;
-    size_t                                      max_client_body_size;
+    std::map<std::string, Location>                     locations;
+    std::map<int, std::string>                          error_pages;
+    size_t                                              max_client_body_size;
 
 public:
     ServerConfig();
