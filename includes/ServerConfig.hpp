@@ -20,7 +20,6 @@ public:
 
     void            addErrorPage(int error_code, const std::string& page);
 
-
     // setters
     void            addListen(const std::string& ip, const std::string& port);
     void            setMaxClientBodySize(size_t size);
@@ -31,7 +30,6 @@ public:
     const std::map<int, std::string>&                   getErrorPages() const;
     const std::map<std::string, Location>&              getLocations() const;
     size_t          getMaxClientBodySize() const;
-
 
 };
 

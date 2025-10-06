@@ -44,6 +44,19 @@ bool StaticFileHandler::isReadable(const std::string& path) const {
     return (access(path.c_str(), R_OK) == 0);
 }
 
+std::string StaticFileHandler::readFile(const std::string& path) const {
+    std::ifstream file(path.c_str());
+    if (!file.is_open()) {
+        return "";
+    }
+    
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    file.close();
+    
+    return buffer.str();
+}
+
 std::vector<std::string>    StaticFileHandler::listDirectory(const std::string& path) const {
     std::vector<std::string> entries;
    
@@ -81,3 +94,16 @@ std::string StaticFileHandler::getContentType(const std::string& path) const {
     return getMimeType(path);
 }
 
+bool StaticFileHandler::isPathSafe(const std::string& path) const {
+    // Check for directory traversal attempts
+    if (path.find("..") != std::string::npos) {
+        return false;
+    }
+    
+    // Check for null bytes
+    if (path.find('\0') != std::string::npos) {
+        return false;
+    }
+    
+    return true;
+}

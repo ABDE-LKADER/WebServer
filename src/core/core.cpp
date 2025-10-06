@@ -5,6 +5,7 @@
 # include "../includes/HttpResponseBuilder.hpp"
 # include "../includes/HttpResponse.hpp"
 # include "../includes/Client.hpp"
+#include <string>
 
 int	main( int argc, char **argv ) {
 	try {
@@ -27,6 +28,13 @@ int	main( int argc, char **argv ) {
 //NOTE: Building response
 
 	//TODO: need a mechanism to determine which server to use
+		// Fill error pages for testing
+		std::string errPage_404("./errors/404.html");
+		std::string errPage_403("./errors/403.html");
+
+		servers[0].addErrorPage(404, errPage_404);
+		servers[0].addErrorPage(403, errPage_403);
+
 		HttpResponseBuilder builder(servers[0]);
 	//NOTE: At the time let's consider that the line above is done
 	//NOTE: my goal at the moment is to generate a response
@@ -47,6 +55,7 @@ int	main( int argc, char **argv ) {
 		test_client_001.location.setReturn(301, "https://example.com");
 		test_client_001.location.addCgi(".php", "/usr/bin/php-cgi");
 
+	
 		test_client_001.request.method = "GET";
 
 		HttpResponse response = builder.buildResponse(test_client_001);

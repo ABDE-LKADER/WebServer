@@ -8,14 +8,33 @@ ErrorHandler::ErrorHandler(const ServerConfig& config) : server_config(config) {
 ErrorHandler::~ErrorHandler() {
 }
 
+std::string ErrorHandler::getErrorPagePath(int error_code) const {
+    const std::map<int, std::string>& error_pages = server_config.getErrorPages();
+
+    std::map<int, std::string>::const_iterator it = error_pages.find(error_code);
+    if (it != error_pages.end()) {
+	return it->second;
+    }
+
+    return "";
+}
+
 std::string ErrorHandler::generateErrorResponse(int error_code) const {
     // First try to load custom error page
-    if (hasCustomErrorPage(error_code)) { // this should check if the error code has a Custom Error Page"
+    if (hasCustomErrorPage(error_code)) {
 	// NOTE: use staticFileHandler to check if exist and readable
 	// if so return it
-	return ("This a place holder: this should return a costum error page");
+
+	// TODO: method get path of the error_file from error code 
+	std::string error_page_path = getErrorPagePath(error_code);
+
+
+	StaticFileHandler static_handler;
+	if (static_handler.fileExists(error_page_path)
+		&& static_handler.isReadable(error_page_path)) {
+	    return static_handler.readFile(error_page_path);
+	}
     }
-    
     // Generate default error page
     return generateDefaultErrorPage(error_code);
 }

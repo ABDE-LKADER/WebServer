@@ -7,10 +7,13 @@
 #include <vector>
 #include <dirent.h>
 #include <sstream>
+#include <fstream>
+
 
 class StaticFileHandler {
 private:
-    std::string getMimeType(const std::string& path) const;
+    std::string     getMimeType(const std::string& path) const;
+    bool            isPathSafe(const std::string& path) const;
 
 public:
     StaticFileHandler();
@@ -19,6 +22,7 @@ public:
     bool            fileExists(const std::string& path) const;
     bool            isDirectory(const std::string& path) const;
     bool            isReadable(const std::string& path) const;
+    std::string     readFile(const std::string& path) const;
 
     std::vector<std::string>    listDirectory(const std::string& path) const;
     std::string                 getContentType(const std::string& path) const;
