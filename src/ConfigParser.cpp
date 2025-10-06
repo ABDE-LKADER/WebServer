@@ -43,6 +43,7 @@ std::vector<ServerConfig> ConfigParser::parseConfig() {
 
 ServerConfig ConfigParser::parseServer() {
     ServerConfig server;
+    std::map<std::string, bool> unique_listens;
 
 /*********************************TESTS BLOCK********************************/
     // std::cout << "inside parseServer" << std::endl;
@@ -81,6 +82,16 @@ ServerConfig ConfigParser::parseServer() {
 	    //'127.0.0.1:8080' ';'
 	    std::string listen_value = getCurrentToken();
 	    std::pair<std::string, std::string> addr = parseListenDirective(listen_value);
+
+	    // NOTE: check if key is duplicated
+	    std::string listen_key = addr.first + ":" + addr.second;
+	    // Check if this ip:port combination already exists
+	    if (unique_listens.find(listen_key) != unique_listens.end()) {
+		throwParseError("Duplicate listen directive: " + listen_key);
+	    }
+	    // Add to the map of unique listens
+	    unique_listens[listen_key] = true;
+
 	    server.addListen(addr.first, addr.second);
 	    incrementTokenIndex();
 	    // --> we should technically have ';'
@@ -271,7 +282,7 @@ Location ConfigParser::parseLocation() {
 	    incrementTokenIndex();
 	    expectToken(";");
 	} else {
-	    throwParseError("Unknown directive in location block: '" + directive + "'");
+		throwParseError("Unknown directive in location block: '" + directive + "'");
         }
     }
 
