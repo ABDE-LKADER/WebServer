@@ -1,4 +1,4 @@
-#include "../includes/HttpResponseBuilder.hpp"
+#include "HttpResponseBuilder.hpp"
 
 HttpResponseBuilder::HttpResponseBuilder(const ServerConfig& config):
     server_config (config), error_handler (config) {

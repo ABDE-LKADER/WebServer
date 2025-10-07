@@ -1,4 +1,4 @@
-#include "../includes/HttpResponse.hpp"
+#include "HttpResponse.hpp"
 
 HttpResponse::HttpResponse() : http_version("HTTP/1.0") {
 }

@@ -2,9 +2,9 @@
 #define CLIENT_HPP
 
 #include <string>
-#include "../includes/HttpResponse.hpp"
-#include "../includes/HttpRequest.hpp"
-#include "../includes/StaticFileHandler.hpp"
+#include "HttpResponse.hpp"
+#include "HttpRequest.hpp"
+#include "StaticFileHandler.hpp"
 #include "Location.hpp"
 
 class Client {
