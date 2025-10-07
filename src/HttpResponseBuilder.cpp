@@ -1,7 +1,7 @@
-#include "HttpResponseBuilder.hpp"
+// #include "HttpResponseBuilder.hpp"
 
 // NOTE: Delte this later
-// #include "../includes/HttpResponseBuilder.hpp"
+#include "../includes/HttpResponseBuilder.hpp"
 
 HttpResponseBuilder::HttpResponseBuilder(const ServerConfig& config):
     server_config (config), error_handler (config) {
@@ -86,6 +86,10 @@ HttpResponse HttpResponseBuilder::buildResponse(Client& client) {
     // route to handlers
     if (client.request.method == "GET") {
         return handleGet(client.request, client.location);
+    } else if (client.request.method == "DELETE") {
+        // return handleDelete(client.request, client.location);
+    } else if (client.request.method == "POST") {
+        // return handlePost(client.request, client.location);
     }
 
 
