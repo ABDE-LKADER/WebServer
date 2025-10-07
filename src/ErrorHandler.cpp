@@ -1,5 +1,5 @@
-#include "../includes/ErrorHandler.hpp"
-#include "../includes/HttpResponseBuilder.hpp"
+#include "ErrorHandler.hpp"
+#include "HttpResponseBuilder.hpp"
 #include <sstream>
 
 ErrorHandler::ErrorHandler(const ServerConfig& config) : server_config(config) {

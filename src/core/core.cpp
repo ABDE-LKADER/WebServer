@@ -1,10 +1,10 @@
 # include "core.hpp"
 
-# include "../includes/ConfigParser.hpp"
-# include "../includes/ServerConfig.hpp"
-# include "../includes/HttpResponseBuilder.hpp"
-# include "../includes/HttpResponse.hpp"
-# include "../includes/Client.hpp"
+# include "ConfigParser.hpp"
+# include "ServerConfig.hpp"
+# include "HttpResponseBuilder.hpp"
+# include "HttpResponse.hpp"
+# include "Client.hpp"
 #include <string>
 
 int	main( int argc, char **argv ) {

@@ -2,10 +2,10 @@
 #define HTTPRESPONSEBUILDER_HPP
 
 #include "HttpResponse.hpp"
-#include "../includes/ServerConfig.hpp"
-#include "../includes/StaticFileHandler.hpp"
-#include "../includes/Client.hpp"
-#include "../includes/ErrorHandler.hpp"
+#include "ServerConfig.hpp"
+#include "StaticFileHandler.hpp"
+#include "Client.hpp"
+#include "ErrorHandler.hpp"
 
 #include <iostream>
 

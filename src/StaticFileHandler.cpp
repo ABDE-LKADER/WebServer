@@ -1,4 +1,4 @@
-#include "../includes/StaticFileHandler.hpp"
+#include "StaticFileHandler.hpp"
 #include <algorithm>
 #include <dirent.h>
 
