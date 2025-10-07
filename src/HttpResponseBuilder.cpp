@@ -1,4 +1,6 @@
 #include "../includes/HttpResponseBuilder.hpp"
+#include <cctype>
+#include <cstddef>
 
 HttpResponseBuilder::HttpResponseBuilder(const ServerConfig& config):
     server_config (config), error_handler (config) {
@@ -26,6 +28,29 @@ std::string HttpResponseBuilder::generateDirectoryListing(const std::string& pat
     return ss.str();
 }
 
+bool HttpResponseBuilder::isMethodAllowed(const std::string& method, const Location& location) const {
+    const std::vector<std::string>& allowed = location.getMethods();
+    
+    if (allowed.empty()) {
+        // If no methods specified, allow GET by default
+        return (method == "GET");
+    }
+    
+    for (size_t i = 0; i < allowed.size(); ++i) {
+        std::string allowed_upper = allowed[i];
+        // Convert to uppercase
+        for (std::string::iterator it = allowed_upper.begin(); it != allowed_upper.end(); ++it) {
+            *it = std::toupper(static_cast<unsigned char>(*it));
+        }
+        
+        if (allowed_upper == method) {
+            return true;
+        }
+    }
+    
+    return false;
+}
+
 HttpResponse HttpResponseBuilder::handleAutoIndex(const std::string& path) const {
     HttpResponse response;
     
@@ -37,27 +62,7 @@ HttpResponse HttpResponseBuilder::handleAutoIndex(const std::string& path) const
     return response;
 }
 
-
 HttpResponse HttpResponseBuilder::buildResponse(Client& client) {
-
-/*
-    HttpRequestData request;
-        request.method = "GET";
-        request.path = "/";
-        request.headers["head1"] = "head_one";
-
-    ServerConfig& server_config;
-        listen;
-        locations;
-        error_pages;
-        max_client_body_size;
-
-    GET / http/1.1
-    head1: head_one
-
-    This is the body
-*/
-
 /*
     1_ check if the method is implemented
     2_ if METHOD == POST
@@ -67,11 +72,15 @@ HttpResponse HttpResponseBuilder::buildResponse(Client& client) {
     5_ route to handlers
 */
 
-    // find location
-    //Location location = server_config.getLocations()
+    if (!isMethodAllowed(client.request.method, client.location)) {
+        HttpResponse response;
+        response.setStatusCode(405);
+        response.setContentType("text/html");
+        response.writeStringToBuffer(error_handler.generateErrorResponse(405));
+        return response;
+    }
 
     if (client.request.method == "GET") {
-        //TODO: function that handles get
         return handleGet(client.request, client.location);
     }
 
@@ -91,10 +100,10 @@ HttpResponse HttpResponseBuilder::handleGet(const HttpRequest& request, const Lo
 // full_path = "./test_files/regular_readable_file";
 // full_path = "./test_files/no_permissions";
 // full_path = "./test_files/file.txt";
-full_path = "./test_files/no_exist";
+// full_path = "./test_files/no_exist";
 // full_path = "./test_files";
 // full_path = "./test_files/";
-// full_path = "./test_files/index.html";
+full_path = "./test_files/index.html";
 // full_path = "./";
 // full_path = "/home/";
 /**********************************/

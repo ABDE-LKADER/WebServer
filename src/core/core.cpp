@@ -32,7 +32,7 @@ int	main( int argc, char **argv ) {
 		std::string errPage_404("./errors/404.html");
 		std::string errPage_403("./errors/403.html");
 
-		servers[0].addErrorPage(404, errPage_404);
+		// servers[0].addErrorPage(404, errPage_404);
 		servers[0].addErrorPage(403, errPage_403);
 
 		HttpResponseBuilder builder(servers[0]);
@@ -42,8 +42,10 @@ int	main( int argc, char **argv ) {
 		// Makeshift client
 		Client test_client_001;
 		std::vector<std::string> methods;
-		// methods.push_back("GET");
+		// methods.push_back("get");
 		methods.push_back("POST");
+		// methods.push_back("test");
+		methods.push_back("GET");
 
 		test_client_001.location.setMethods(methods);
 		test_client_001.location.setRoot("/var/www/html");

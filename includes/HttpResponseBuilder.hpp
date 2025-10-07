@@ -22,6 +22,7 @@ public:
 
     std::string     generateDirectoryListing(const std::string& path) const;
 
+    bool            isMethodAllowed(const std::string& method, const Location& location) const;
     HttpResponse    handleAutoIndex(const std::string& path) const;
     HttpResponse    buildResponse(Client& client);
 

@@ -328,6 +328,10 @@ std::vector<std::string> ConfigParser::parseMethodsList() {
 	    method = method.substr(0, method.size() - 1);
 	}
 	if (isValidMethod(method)) {
+	    // to upper
+	    for (std::string::iterator it = method.begin(); it != method.end(); ++it) {
+		*it = std::toupper(static_cast<unsigned char>(*it));
+	    }
 	    methods.push_back(method);
 	}
 	
