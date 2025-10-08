@@ -1,4 +1,7 @@
-#include "HttpResponseBuilder.hpp"
+// #include "HttpResponseBuilder.hpp"
+
+// NOTE: Delte this later
+#include "../includes/HttpResponseBuilder.hpp"
 
 HttpResponseBuilder::HttpResponseBuilder(const ServerConfig& config):
     server_config (config), error_handler (config) {
@@ -35,13 +38,7 @@ bool HttpResponseBuilder::isMethodAllowed(const std::string& method, const Locat
     }
     
     for (size_t i = 0; i < allowed.size(); ++i) {
-        std::string allowed_upper = allowed[i];
-        // Convert to uppercase
-        for (std::string::iterator it = allowed_upper.begin(); it != allowed_upper.end(); ++it) {
-            *it = std::toupper(static_cast<unsigned char>(*it));
-        }
-        
-        if (allowed_upper == method) {
+        if (allowed[i] == method) {
             return true;
         }
     }
@@ -61,15 +58,16 @@ HttpResponse HttpResponseBuilder::handleAutoIndex(const std::string& path) const
 }
 
 HttpResponse HttpResponseBuilder::buildResponse(Client& client) {
-/*
-    1_ check if the method is implemented
-    2_ if METHOD == POST
-        check for body_size
-    3_ find location
-    4_ check if METHOD is allowed in location
-    5_ route to handlers
-*/
+    // check if the method is implemented
+    if (client.request.method != "GET" && client.request.method != "POST" && client.request.method != "DELETE") {
+        HttpResponse response;
+        response.setStatusCode(501);
+        response.setContentType("text/html");
+        response.writeStringToBuffer(error_handler.generateErrorResponse(501));
+        return response;
+    }
 
+    // check if METHOD is allowed in location
     if (!isMethodAllowed(client.request.method, client.location)) {
         HttpResponse response;
         response.setStatusCode(405);
@@ -78,8 +76,14 @@ HttpResponse HttpResponseBuilder::buildResponse(Client& client) {
         return response;
     }
 
+
+    // route to handlers
     if (client.request.method == "GET") {
         return handleGet(client.request, client.location);
+    } else if (client.request.method == "DELETE") {
+        // return handleDelete(client.request, client.location);
+    } else if (client.request.method == "POST") {
+        // return handlePost(client.request, client.location);
     }
 
 

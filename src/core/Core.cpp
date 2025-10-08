@@ -1,11 +1,19 @@
-# include "Core.hpp"
+// # include "core.hpp"
 
-# include "ConfigParser.hpp"
-# include "ServerConfig.hpp"
-# include "HttpResponseBuilder.hpp"
-# include "HttpResponse.hpp"
-# include "Client.hpp"
-#include <string>
+// # include "ConfigParser.hpp"
+// # include "ServerConfig.hpp"
+// # include "HttpResponseBuilder.hpp"
+// # include "HttpResponse.hpp"
+// # include "Client.hpp"
+
+// NOTE: Delte these later
+// #include "../core/core.hpp"
+#include "../../includes/ConfigParser.hpp"
+#include "../../includes/HttpResponseBuilder.hpp"
+#include "../../includes/HttpResponse.hpp"
+#include "../../includes/ServerConfig.hpp"
+#include "../../includes/Client.hpp"
+#include <cstdlib>
 
 int	main( int argc, char **argv ) {
 	try {
@@ -56,7 +64,8 @@ int	main( int argc, char **argv ) {
 		test_client_001.location.addCgi(".php", "/usr/bin/php-cgi");
 
 	
-		test_client_001.request.method = "GET";
+		test_client_001.request.method = "OPTION";
+		// test_client_001.request.method = "GET";
 
 		HttpResponse response = builder.buildResponse(test_client_001);
 
