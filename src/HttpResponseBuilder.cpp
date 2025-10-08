@@ -38,13 +38,7 @@ bool HttpResponseBuilder::isMethodAllowed(const std::string& method, const Locat
     }
     
     for (size_t i = 0; i < allowed.size(); ++i) {
-        std::string allowed_upper = allowed[i];
-        // Convert to uppercase
-        for (std::string::iterator it = allowed_upper.begin(); it != allowed_upper.end(); ++it) {
-            *it = std::toupper(static_cast<unsigned char>(*it));
-        }
-        
-        if (allowed_upper == method) {
+        if (allowed[i] == method) {
             return true;
         }
     }
