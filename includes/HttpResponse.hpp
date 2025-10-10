@@ -26,6 +26,7 @@ public:
     void setStatusMessage(const std::string& message);
     void setContentType(const std::string& type);
     void setHeader(const std::string& name, const std::string& value);
+    void setLocation(const std::string& url);
 
     // Getters
     int                     getStatusCode() const;

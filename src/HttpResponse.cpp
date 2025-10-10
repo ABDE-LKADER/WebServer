@@ -26,6 +26,11 @@ void HttpResponse::setHeader(const std::string& name, const std::string& value) 
     headers[name] = value;
 }
 
+void HttpResponse::setLocation(const std::string& url) {
+    setHeader("Location", url);
+}
+
+#include <iostream>
 std::string HttpResponse::toString() const {
     std::stringstream ss;
     
