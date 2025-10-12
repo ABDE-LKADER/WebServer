@@ -3,6 +3,7 @@
 
 # include <string>
 # include <vector>
+# include "ConfigParser.hpp"
 # include "Location.hpp"
 
 typedef std::map<std::string, std::string> map_t;
@@ -24,6 +25,7 @@ class Request
 		std::string				query;
 
 		map_t					headers;
+		ServerConfig			server;
 
 		bool					has_content_length;
 		size_t					content_length;

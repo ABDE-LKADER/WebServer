@@ -1,0 +1,3 @@
+400 Bad Request;
+405 Method Not Allowed = Location Has Only GET And The Method Is POST;
+

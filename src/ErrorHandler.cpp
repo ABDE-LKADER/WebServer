@@ -32,7 +32,6 @@ std::string ErrorHandler::generateErrorResponse(int error_code) const {
 	// TODO: method get path of the error_file from error code 
 	std::string error_page_path = getErrorPagePath(error_code);
 
-
 	StaticFileHandler static_handler;
 	if (static_handler.fileExists(error_page_path)
 		&& static_handler.isReadable(error_page_path)) {
@@ -68,4 +67,3 @@ std::string ErrorHandler::generateDefaultErrorPage(int error_code) const {
 
     return ss.str();
 }
-

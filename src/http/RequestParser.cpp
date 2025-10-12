@@ -23,7 +23,8 @@ state_e	RequestParser::requestLineParser( Request &request ) {
 			|| space != ' ' || _space != ' ' || request.target[0] != '/')
 		return BAD;
 
-	request.full_path = "." + request.target;
+	request.full_path = "." + request.server.getLocations().find("/")->second.getRoot()
+			+ request.target; // Full Path Handler
 
 	std::cout << "[ " << request.method <<  " ] " 
 			  << "[ " << request.target <<  " ] " 

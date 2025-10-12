@@ -35,7 +35,6 @@ class Connection
 		state_e			state;
 
 		Request			request;
-		ServerConfig	server;
 		HttpResponse	response;
 };
 

@@ -77,10 +77,10 @@ HttpResponse HttpResponseBuilder::buildResponse(Request& request) {
         return response;
     }
 
-    // // check for redirection
-    // if (request.location.getReturn().first != 0) {
-    //     return handleRedirect(request.location.getReturn().first, request.location.getReturn().second);
-    // }
+    // check for redirection
+    if (request.location.getReturn().first != 0) {
+        return handleRedirect(request.location.getReturn().first, request.location.getReturn().second);
+    }
 
     // route to handlers
     if (request.method == "GET") {
@@ -115,7 +115,7 @@ HttpResponse    HttpResponseBuilder::handleRedirect(int status_code, const std::
 
 HttpResponse HttpResponseBuilder::handleGet(const Request& request, const Location& location) {
     HttpResponse response;
-    std::string full_path = request.full_path;
+    const std::string full_path = request.full_path;
 
 /******** //NOTE: TESTING *********/
 // full_path = "./test_files/regular_readable_file";
@@ -124,7 +124,7 @@ HttpResponse HttpResponseBuilder::handleGet(const Request& request, const Locati
 // full_path = "./test_files/no_exist";
 // full_path = "./test_files";
 // full_path = "./test_files/";
-full_path = "./test_files/index.html";
+// full_path = "./test_files/index.html";
 // full_path = "./";
 // full_path = "/home/";
 /**********************************/

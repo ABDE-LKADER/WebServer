@@ -4,7 +4,10 @@
 Connection::Connection( void ) : soc(-1), code(0), state(REQUEST_LINE) { }
 
 Connection::Connection( int conn_sock, ServerConfig server ) : soc(conn_sock),
-		code(0), state(REQUEST_LINE), server(server) { }
+		code(0), state(REQUEST_LINE) {
+	request.server = server;
+	request.location = server.getLocations().find("/")->second;
+}
 
 Connection::~Connection( void ) { }
 
@@ -37,11 +40,17 @@ void	Connection::requestProssessing( void ) {
 }
 
 void	Connection::reponseProssessing( void ) {
-	HttpResponseBuilder		builder(server);
+	HttpResponseBuilder		builder(request.server);
+
+	std::cout << request.server.getErrorPages().find(404)->second << std::endl;
 
 	if (state != BAD) 
 		response = builder.buildResponse(request);
-	else
-		
+	else {
+		response.setStatusCode(code);
+		response.setContentLength(0);
+	}
+
+	// Generate Respose Error; 
 	send(soc, response.toString().c_str(), response.toString().length(), MSG_NOSIGNAL);
 }
