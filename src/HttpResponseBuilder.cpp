@@ -119,12 +119,12 @@ HttpResponse HttpResponseBuilder::handleGet(const Request& request, const Locati
 
 /******** //NOTE: TESTING *********/
 // full_path = "./test_files/regular_readable_file";
-full_path = "./test_files/no_permissions";
+// full_path = "./test_files/no_permissions";
 // full_path = "./test_files/file.txt";
 // full_path = "./test_files/no_exist";
 // full_path = "./test_files";
 // full_path = "./test_files/";
-// full_path = "./test_files/index.html";
+full_path = "./test_files/index.html";
 // full_path = "./";
 // full_path = "/home/";
 /**********************************/
@@ -217,9 +217,36 @@ full_path = "./test_files/no_permissions";
     return response;
 }
 
-HttpResponse HttpResponseBuilder::handleDelete(const std::string& full_path) {
+HttpResponse HttpResponseBuilder::handleDelete(std::string full_path) {
     HttpResponse response;
-    (void)full_path;
+
+/******** //NOTE: TESTING *********/
+// full_path = "./test_files/regular_readable_file";
+// full_path = "./test_files/no_permissions";
+// full_path = "./test_files/file.txt";
+// full_path = "./test_files/no_exist";
+// full_path = "./test_files";
+// full_path = "./test_files/";
+// full_path = "./test_files/index.html";
+// full_path = "./";
+full_path = "/home/";
+/**********************************/
+
+    // Check if path exists
+    if (! static_handler.fileExists(full_path)) {
+        response.setStatusCode(404);
+        response.setContentType("text/html");
+        response.writeStringToBuffer(error_handler.generateErrorResponse(404));
+        return response;
+    }
+
+    if (static_handler.isDirectory(full_path)) {
+        response.setStatusCode(403);
+        response.setContentType("text/html");
+        response.writeStringToBuffer(error_handler.generateErrorResponse(403));
+        return response;
+    }
+
     /******** //NOTE: TESTING *********/
     std::cout << "Test I'm in handleDelte function\n";
     /**********************************/
