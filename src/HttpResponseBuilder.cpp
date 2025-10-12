@@ -60,13 +60,13 @@ HttpResponse HttpResponseBuilder::handleAutoIndex(const std::string& path) const
 
 HttpResponse HttpResponseBuilder::buildResponse(Request& request) {
     // check if the method is implemented
-    if (request.method != "GET" && request.method != "POST" && request.method != "DELETE") {
-        HttpResponse response;
-        response.setStatusCode(501);
-        response.setContentType("text/html");
-        response.writeStringToBuffer(error_handler.generateErrorResponse(501));
-        return response;
-    }
+    // if (request.method != "GET" && request.method != "POST" && request.method != "DELETE") {
+    //     HttpResponse response;
+    //     response.setStatusCode(501);
+    //     response.setContentType("text/html");
+    //     response.writeStringToBuffer(error_handler.generateErrorResponse(501));
+    //     return response;
+    // }
 
     // check if METHOD is allowed in location
     if (!isMethodAllowed(request.method, request.location)) {
@@ -77,11 +77,6 @@ HttpResponse HttpResponseBuilder::buildResponse(Request& request) {
         return response;
     }
 
-// NOTE: test block redirection -------------
-// std::string full_path = "http://127.0.0.1/www/index.html";
-// request.location.setReturn(302, full_path);
-//
-
     // // check for redirection
     // if (request.location.getReturn().first != 0) {
     //     return handleRedirect(request.location.getReturn().first, request.location.getReturn().second);
@@ -91,9 +86,7 @@ HttpResponse HttpResponseBuilder::buildResponse(Request& request) {
     if (request.method == "GET") {
         return handleGet(request, request.location);
     } else if (request.method == "DELETE") {
-        // return handleDelete(Connection.request, Connection.location);
-    } else if (request.method == "POST") {
-        // return handlePost(Connection.request, Connection.location);
+        return handleDelete(request.full_path);
     }
 
 //NOTE: these lines are here just to suppress the warning from the compiler
@@ -131,7 +124,7 @@ HttpResponse HttpResponseBuilder::handleGet(const Request& request, const Locati
 // full_path = "./test_files/no_exist";
 // full_path = "./test_files";
 // full_path = "./test_files/";
-// full_path = "./test_files/index.html";
+full_path = "./test_files/index.html";
 // full_path = "./";
 // full_path = "/home/";
 /**********************************/
@@ -224,3 +217,34 @@ HttpResponse HttpResponseBuilder::handleGet(const Request& request, const Locati
     return response;
 }
 
+HttpResponse HttpResponseBuilder::handleDelete(std::string full_path) {
+    HttpResponse response;
+
+    // Check if path exists
+    if (! static_handler.fileExists(full_path)) {
+        response.setStatusCode(404);
+        response.setContentType("text/html");
+        response.writeStringToBuffer(error_handler.generateErrorResponse(404));
+        return response;
+    }
+
+    // if Dir == forbidden
+    if (static_handler.isDirectory(full_path)) {
+        response.setStatusCode(403);
+        response.setContentType("text/html");
+        response.writeStringToBuffer(error_handler.generateErrorResponse(403));
+        return response;
+    }
+
+    if (static_handler.deleteFile(full_path)) {
+        response.setStatusCode(204);  // No Content
+        response.setContentType("text/html");
+        response.setContentLength(0);
+    } else {
+        response.setStatusCode(500);
+        response.setContentType("text/html");
+        response.writeStringToBuffer(error_handler.generateErrorResponse(500));
+    }
+
+    return response;
+}
