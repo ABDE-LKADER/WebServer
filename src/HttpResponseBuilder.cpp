@@ -60,13 +60,13 @@ HttpResponse HttpResponseBuilder::handleAutoIndex(const std::string& path) const
 
 HttpResponse HttpResponseBuilder::buildResponse(Request& request) {
     // check if the method is implemented
-    if (request.method != "GET" && request.method != "POST" && request.method != "DELETE") {
-        HttpResponse response;
-        response.setStatusCode(501);
-        response.setContentType("text/html");
-        response.writeStringToBuffer(error_handler.generateErrorResponse(501));
-        return response;
-    }
+    // if (request.method != "GET" && request.method != "POST" && request.method != "DELETE") {
+    //     HttpResponse response;
+    //     response.setStatusCode(501);
+    //     response.setContentType("text/html");
+    //     response.writeStringToBuffer(error_handler.generateErrorResponse(501));
+    //     return response;
+    // }
 
     // check if METHOD is allowed in location
     if (!isMethodAllowed(request.method, request.location)) {
@@ -77,11 +77,6 @@ HttpResponse HttpResponseBuilder::buildResponse(Request& request) {
         return response;
     }
 
-// NOTE: test block redirection -------------
-std::string full_path = "https://www.google.com";
-request.location.setReturn(302, full_path);
-//
-
     // check for redirection
     if (request.location.getReturn().first != 0) {
         return handleRedirect(request.location.getReturn().first, request.location.getReturn().second);
@@ -91,9 +86,7 @@ request.location.setReturn(302, full_path);
     if (request.method == "GET") {
         return handleGet(request, request.location);
     } else if (request.method == "DELETE") {
-        // return handleDelete(Connection.request, Connection.location);
-    } else if (request.method == "POST") {
-        // return handlePost(Connection.request, Connection.location);
+        // return handleDelete(request, request.location);
     }
 
 //NOTE: these lines are here just to suppress the warning from the compiler
