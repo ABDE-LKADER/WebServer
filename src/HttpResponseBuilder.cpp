@@ -78,14 +78,14 @@ HttpResponse HttpResponseBuilder::buildResponse(Request& request) {
     }
 
 // NOTE: test block redirection -------------
-std::string full_path = "https://www.google.com";
-request.location.setReturn(302, full_path);
+// std::string full_path = "http://127.0.0.1/www/index.html";
+// request.location.setReturn(302, full_path);
 //
 
-    // check for redirection
-    if (request.location.getReturn().first != 0) {
-        return handleRedirect(request.location.getReturn().first, request.location.getReturn().second);
-    }
+    // // check for redirection
+    // if (request.location.getReturn().first != 0) {
+    //     return handleRedirect(request.location.getReturn().first, request.location.getReturn().second);
+    // }
 
     // route to handlers
     if (request.method == "GET") {
@@ -126,7 +126,7 @@ HttpResponse HttpResponseBuilder::handleGet(const Request& request, const Locati
 
 /******** //NOTE: TESTING *********/
 // full_path = "./test_files/regular_readable_file";
-full_path = "./test_files/no_permissions";
+// full_path = "./test_files/no_permissions";
 // full_path = "./test_files/file.txt";
 // full_path = "./test_files/no_exist";
 // full_path = "./test_files";

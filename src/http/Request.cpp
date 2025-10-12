@@ -3,3 +3,7 @@
 Request::Request( void ) : has_content_length(false), content_length(0) { }
 
 Request::~Request( void ) { }
+
+void    Request::start( void ) {
+    ;
+}

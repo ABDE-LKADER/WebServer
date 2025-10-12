@@ -27,6 +27,8 @@ class Request
 
 		bool					has_content_length;
 		size_t					content_length;
+
+		void					start( void );
 };
 
 #endif

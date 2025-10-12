@@ -40,24 +40,36 @@ state_e	RequestParser::headersParser( Request &request ) {
 		return READING_HEADERS;
 
 	std::stringstream	headersBlock;
-	std::string			line;
 
-	headersBlock << request.recv.substr(0, pos);
+	headersBlock << request.recv.substr(crlf.size(), pos);
 	request.recv.erase(0, pos + (crlf + crlf).size());
 
-	headersBlock >> std::ws;
+	std::string			line;
 	while (std::getline(headersBlock, line)) {
-		std::istringstream		streamLine(line);
-		std::string				name;
-		std::string				value;
+		if (line.empty()) continue ;
 
-		if (!(streamLine >> name >> value >> std::ws) || !streamLine.eof())
+		std::string::size_type	colum = line.find(':');
+
+		if (line[0] == ' ' || line[0] == '\t' || colum == std::string::npos)
 			return BAD;
 
-		std::cout << "[ " + name + " ]" << "[ " + value + " ]" << std::endl;
+		std::string				name = line.substr(0, colum);
+		std::string				value = line.substr(colum + 1);
 
 		std::transform(name.begin(), name.end(), name.begin(),
 			static_cast<int(*)(int)>(std::tolower));
+
+		for (size_t index = 0; index < value.size() && (value[index] == ' '
+				|| value[index] == '\t'); ++index)
+			value.erase(0, index);
+
+		for (size_t index = value.size(); index > 0 && (value[index - 1] == ' '
+				|| value[index - 1] == '\r'); --index)
+			value.erase(index - 1);
+
+		if (name == "transfer-encoding") return BAD;
+
+		std::cout << "[ " + name + " ]" << "[ " + value + " ]" << std::endl;
 
 		request.headers[name] = value;
 	}

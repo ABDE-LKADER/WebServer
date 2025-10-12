@@ -27,7 +27,11 @@ void	Connection::requestProssessing( void ) {
 	RequestParser	parser;
 	request.recv.append(buffer, len);
 
-	if (state == REQUEST_LINE) state = parser.requestLineParser(request);
+	if (state == REQUEST_LINE) {
+		state = parser.requestLineParser(request);
+		request.start();
+	}
+
 	if (state == READING_HEADERS) state = parser.headersParser(request);
 	if (state == READING_BODY) state = parser.bodyParser(request);
 }
@@ -35,6 +39,9 @@ void	Connection::requestProssessing( void ) {
 void	Connection::reponseProssessing( void ) {
 	HttpResponseBuilder		builder(server);
 
-	response = builder.buildResponse(request);
+	if (state != BAD) 
+		response = builder.buildResponse(request);
+	else
+		
 	send(soc, response.toString().c_str(), response.toString().length(), MSG_NOSIGNAL);
 }
