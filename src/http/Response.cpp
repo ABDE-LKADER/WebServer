@@ -30,7 +30,6 @@ void Response::setLocation(const std::string& url) {
 void Response::generateErrorPage(const ServerConfig &server, int code) {
     ErrorHandler    error_handler(server);
 
-    std::cout << "From Generate Error Page" << std::endl;
     setStatusCode(code);
     setContentType("text/html");
     writeStringToBuffer(error_handler.generateErrorResponse(code));

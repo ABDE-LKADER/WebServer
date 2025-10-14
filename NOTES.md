@@ -8,3 +8,12 @@
 -----------------------------------------------------------------------
 505 HTTP Version Not Supported — wrong HTTP version;
 -----------------------------------------------------------------------
+
+
+## HTTP/1.0:
+    - Reserved (as delimiters only): ; / ? : @ = &
+    - Percent-encodings: % HEX HEX
+    - Unsafe / disallowed in URLs (must be percent-encoded): space, #, <, >, ", {, }, |, \, ^, ~, [, ], `, plus all control characters (0x00–0x1F and 0x7F) and non-ASCII.
+
++ Normalize dot-segments: Reject Traversal.
++ Reject NULL Injection.

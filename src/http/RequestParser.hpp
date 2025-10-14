@@ -23,15 +23,25 @@ class State {
 class RequestParser
 {
 	public:
-		RequestParser( void );
-		~RequestParser( void );
+		static State		requestLineParser( Request & );
+		static State		headersParser( Request & );
+		static State		bodyParser( Request & );
 
-		State		requestLineParser( Request & );
-		State		headersParser( Request & );
-		State		bodyParser( Request & );
+		static bool			isCTL( unsigned char c );
+		static bool			isTspecials( unsigned char c );
 
-	// private:
-	// 	void		fun(void);
+		static bool			isValidMethod( const std::string & );
+		static bool			isValidVersion( const std::string & );
+
+		bool				allDigits( const std::string & );
+		static std::string	toUpperInPlace( std::string );
+
+		static bool			percentDecode( const std::string &target );
+
+	private:
+		static bool			methodParser( std::string & , int & );
+		static bool			targetParser( std::string & , std::string & );
+		static bool			versionParser( std::string & , int & );
 };
 
 #endif

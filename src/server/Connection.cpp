@@ -26,16 +26,14 @@ void	Connection::requestProssessing( void ) {
 	ssize_t			len;
 
 	if ((len = recv(soc, buffer, BUF_SIZE, false)) == ERROR) return ;
-
-	RequestParser	parser;
 	request.recv.append(buffer, len);
 
 	if (getState() == REQUEST_LINE)
-		status = parser.requestLineParser(request);
+		status = RequestParser::requestLineParser(request);
 	if (getState() == READING_HEADERS)
-		status = parser.headersParser(request);
+		status = RequestParser::headersParser(request);
 	if (getState() == READING_BODY)
-		status = parser.bodyParser(request);
+		status = RequestParser::bodyParser(request);
 }
 
 void	Connection::reponseProssessing( void ) {
