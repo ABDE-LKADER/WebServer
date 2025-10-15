@@ -89,14 +89,40 @@ bool	RequestParser::decodeValidator( std::string &string, bool is_query ) {
 	return (string = decoded, true);
 }
 
-std::string	RequestParser::removeDotSegment( std::string input ) {
-	std::string		output;
+std::string	RequestParser::removeDotSegment( std::string in ) {
+	std::string			out;
 
-	while (input.empty()) {
-		break ;
+	while (!in.empty()) {
+		if (in.rfind("./", 0) == 0) in.erase(0, 2);
+		else if (in.rfind("../", 0) == 0) in.erase(0, 3);
+
+		else if (in.rfind("/./", 0) == 0 || in == "/.")
+			in.replace(0, (in == "/.") ? 2 : 3, "/");
+
+		else if (in.rfind("/../", 0) == 0 || in == "/..") {
+			in.replace(0, (in == "/..") ? 3 : 4, "/");
+
+			size_t		pos = out.find_last_of('/');
+			if (pos != std::string::npos) out.erase(pos);
+			else out.clear();
+		}
+
+		else if (in == "." || in == "..")
+			in.clear();
+
+		else {
+			size_t		pos = in.find('/', 1);
+			if (pos == std::string::npos) pos = in.size();
+
+			out.append(in, 0, pos);
+			in.erase(0, pos);
+		}
+		
+		std::cout << "INPUT: " << in << std::endl;
+		std::cout << "OUTPUT: " << out << std::endl;
 	}
 
-	return output;
+	return out;
 }
 
 bool	RequestParser::targetParser( std::string &target, std::string &query ) {
@@ -112,7 +138,10 @@ bool	RequestParser::targetParser( std::string &target, std::string &query ) {
 	if (decodeValidator(target, false) == false) return false;
 	if (decodeValidator(query, true) == false) return false;
 
-	return (removeDotSegment(target), true);
+	if (target.find('.') != std::string::npos)
+		target = removeDotSegment(target);
+
+	return true;
 }
 
 bool	RequestParser::versionParser( const std::string &version, int &code ) {
