@@ -27,6 +27,14 @@ std::string	RequestParser::strToUpper( std::string token ) {
 	return token;
 }
 
+char	RequestParser::hexToChar( const std::string &hex ) {
+	unsigned int			value = 0;
+	std::stringstream		streamHex(hex);
+
+	streamHex >> std::hex >> value;
+	return static_cast<char>(value);
+}
+
 bool	RequestParser::isTspecials( unsigned char c ) {
 	switch (c) {
 		case '(': case ')': case '<': case '>': case '@':
@@ -39,56 +47,72 @@ bool	RequestParser::isTspecials( unsigned char c ) {
 	}
 }
 
-bool	RequestParser::percentDecode( const std::string &target ) {
-	for (size_t index = 0; index < target.size(); ++index) {
-		if (target[index] == '%') {
-			if (index + 2 >= target.size()) return false;
-			if (!std::isxdigit(target[index + 1]) || !std::isxdigit(target[index + 2]))
-				return false;
-			// std::replace();
-			index += 2;
-		}
-	}
-	return true;
-}
-
 bool	RequestParser::methodParser( std::string &method, int &code) {
 	code = 400;
 
 	if (method.empty()) return false;
-
+	
 	for (size_t index = 0; index < method.size(); ++index)
-		if (isTspecials(method[index]) || isCTL(method[index]))
-			return false;
-
+	if (isTspecials(method[index]) || isCTL(method[index]))
+	return false;
+	
 	if (isValidMethod(method)) return true;
 	if (isValidMethod(strToUpper(method))) return false;
-
+	
 	return (code = 501, false);
+}
+
+bool	RequestParser::decodeValidator( std::string &string, bool is_query ) {
+	std::string		decoded;
+
+	for (size_t index = 0; index < string.size(); ++index) {
+		char		curr = string[index];
+
+		if (containsChar(curr, " \t\\#")) return false;
+
+		if (curr == '%') {
+			if (index + 2 >= string.size()) return false;
+			if (!std::isxdigit(string[index + 1])) return false;
+			if (!std::isxdigit(string[index + 2])) return false;
+	
+			curr = hexToChar(string.substr(index + 1, 2));
+			index += 2;
+		}
+
+		if (is_query && isCTL(curr) && curr != '\t') return false;
+		if (!is_query && isCTL(curr)) return false;
+		if (!is_query && containsChar(curr, " \t\\#")) return false;
+
+		decoded += curr;
+	}
+
+	return (string = decoded, true);
+}
+
+std::string	RequestParser::removeDotSegment( std::string input ) {
+	std::string		output;
+
+	while (input.empty()) {
+		break ;
+	}
+
+	return output;
 }
 
 bool	RequestParser::targetParser( std::string &target, std::string &query ) {
 	if(target.empty() || target[0] != '/') return false;
 
-	if (target.find('#') != std::string::npos) return false;
-
-	for (size_t index = 0; index < target.size(); ++index) {
-		if (isCTL(target[index]) || containsChar(target[index], " \t\\"))
-			return false;
-	}
-
-	if (percentDecode(target) == false) return false;
-
-	if (target.find("..") != std::string::npos) return false;
-
 	size_t		pos;
-	
+
 	if((pos = target.find('?')) != std::string::npos) {
 		query = target.substr(pos + 1);
 		target.erase(pos);
 	}
 
-	return true;
+	if (decodeValidator(target, false) == false) return false;
+	if (decodeValidator(query, true) == false) return false;
+
+	return (removeDotSegment(target), true);
 }
 
 bool	RequestParser::versionParser( const std::string &version, int &code ) {
@@ -149,10 +173,6 @@ State	RequestParser::requestLineParser( Request &request ) {
 	if (streamLine >> extra) return State(400, BAD);
 
 	request.full_path = "." + request.target;
-
-	std::cout << "[ " << request.method <<  " ] " 
-			<< "[ " << request.target <<  " ] " 
-			<< "[ " << request.version <<  " ] " << std::endl;
 
 	return State(0, READING_HEADERS);
 }

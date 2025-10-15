@@ -30,15 +30,17 @@ class RequestParser
 		static bool			isCTL( unsigned char c );
 		static bool			isTspecials( unsigned char c );
 		static bool			isValidMethod( const std::string & );
-
+		
+		static char			hexToChar( const std::string & );
+		static bool			decodeValidator( std::string & , bool );
+		
 		static std::string	strToUpper( std::string );
-		static bool			percentDecode( const std::string &target );
+		static std::string	removeDotSegment( std::string  );
 
 		static bool			containsChar( char , const std::string & );
 		static bool			containsAny( const std::string & , const std::string & );
 		static bool			containsOnly( const std::string & , const std::string & );
 
-	private:
 		static bool			methodParser( std::string & , int & );
 		static bool			targetParser( std::string & , std::string & );
 		static bool			versionParser( const std::string & , int & );
