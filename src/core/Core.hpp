@@ -47,15 +47,10 @@ typedef std::vector< std::pair<std::string, std::string> > vector_pairs;
 # define BUF_SIZE 1024
 # define MAX_EVENTS 1024
 
-# define TIMEOUT 1000
 # define ERROR -1
+# define TIMEOUT 1000
 
 # define MAX_REQUEST_LINE 1024
 # define MAX_HEADER_BYTES 10240
-# define MAX_HEADER_COUNT 100
-
-// ------------------------- Webserv Outils -------------------------//
-
-void	printServers( const std::vector<ServerConfig> &servers );
 
 #endif

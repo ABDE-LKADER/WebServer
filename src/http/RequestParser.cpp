@@ -52,10 +52,11 @@ bool	RequestParser::methodParser( std::string &method, int &code) {
 
 	if (method.empty()) return false;
 	
-	for (size_t index = 0; index < method.size(); ++index)
-	if (isTspecials(method[index]) || isCTL(method[index]))
-	return false;
-	
+	for (size_t index = 0; index < method.size(); ++index) {
+		if (isTspecials(method[index]) || isCTL(method[index]))
+			return false;
+	}
+
 	if (isValidMethod(method)) return true;
 	if (isValidMethod(strToUpper(method))) return false;
 	
@@ -104,7 +105,7 @@ std::string	RequestParser::removeDotSegment( std::string in ) {
 
 			size_t		pos = out.find_last_of('/');
 			if (pos != std::string::npos) out.erase(pos);
-			else out.clear();
+			else throw ERROR;
 		}
 
 		else if (in == "." || in == "..")
@@ -117,9 +118,6 @@ std::string	RequestParser::removeDotSegment( std::string in ) {
 			out.append(in, 0, pos);
 			in.erase(0, pos);
 		}
-		
-		std::cout << "INPUT: " << in << std::endl;
-		std::cout << "OUTPUT: " << out << std::endl;
 	}
 
 	return out;
@@ -138,10 +136,13 @@ bool	RequestParser::targetParser( std::string &target, std::string &query ) {
 	if (decodeValidator(target, false) == false) return false;
 	if (decodeValidator(query, true) == false) return false;
 
-	if (target.find('.') != std::string::npos)
-		target = removeDotSegment(target);
+	try {
+		if (target.find('.') != std::string::npos)
+			target = removeDotSegment(target);
+		return true;
+	}
 
-	return true;
+	catch ( int ) { return false; }
 }
 
 bool	RequestParser::versionParser( const std::string &version, int &code ) {
@@ -176,7 +177,7 @@ State	RequestParser::requestLineParser( Request &request ) {
 		return State(0, REQUEST_LINE);
 	}
 
-	if (request.recv.size() > MAX_REQUEST_LINE) return State(414, BAD);
+	if (pos + CRLF.size() > MAX_REQUEST_LINE) return State(414, BAD);
 
 	std::string			line = request.recv.substr(0, pos);
 	int					code;
@@ -210,8 +211,12 @@ State	RequestParser::headersParser( Request &request ) {
 	std::string			DCRLF("\r\n\r\n");
 	size_t				pos;
 
-	if ((pos = request.recv.find(DCRLF)) == std::string::npos)
+	if ((pos = request.recv.find(DCRLF)) == std::string::npos) {
+		if (request.recv.size() > MAX_HEADER_BYTES) return State(431, BAD);
 		return State(0, READING_HEADERS);
+	}
+
+	if (pos + DCRLF.size() > MAX_HEADER_BYTES) return State(431, BAD);
 
 	std::stringstream	headersBlock;
 
@@ -224,32 +229,37 @@ State	RequestParser::headersParser( Request &request ) {
 
 		std::string::size_type	colum = line.find(':');
 
-		if (containsChar(line[0], " \t") || colum == std::string::npos)
-			return State(400, BAD);
+		if (colum == 0) return State(400, BAD);
+		if (colum == std::string::npos) return State(400, BAD);
 
 		std::string				name = line.substr(0, colum);
 		std::string				value = line.substr(colum + 1);
+		size_t					index;
 
-		std::transform(name.begin(), name.end(), name.begin(),
-			static_cast<int(*)(int)>(std::tolower));
+		for (index = 0; index < name.size(); ++index) {
+			if (isTspecials(name[index]) || isCTL(name[index]))
+				return State(400, BAD);
+			name[index] = std::tolower(name[index]);
+		}
 
-		for (size_t index = 0; index < value.size()
-				&& containsChar(value[index], " \t"); ++index)
-			value.erase(0, index);
+		for (index = 0; index < value.size()
+			&& containsChar(value[index], " \t"); ++index);
+		value.erase(0, index);
 
-		for (size_t index = value.size(); index > 0
-				&& containsChar(value[index - 1], "\r \t"); --index)
-			value.erase(index - 1);
+		for (index = value.size(); index > 0
+			&& containsChar(value[index - 1], "\r \t"); --index)
+		value.erase(index - 1);
+
+		for (index = 0; index < value.size(); ++index) {
+			if (isCTL(value[index]) && value[index] != '\t')
+				return State(400, BAD);
+		}
 
 		if (name == "transfer-encoding") return State(400, BAD);
-
-		std::cout << "[ " + name + " ]" << "[ " + value + " ]" << std::endl;
-
 		request.headers[name] = value;
 	}
 
 	if (request.method == "POST") return State(0, READING_BODY);
-
 	return State(0, READY_TO_WRITE);
 }
 

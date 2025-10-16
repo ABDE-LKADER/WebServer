@@ -13,18 +13,19 @@ std::string ResponseBuilder::generateDirectoryListing(const std::string& path) c
     std::stringstream ss;
     std::vector<std::string> entries = static_handler.listDirectory(path);
 
-    ss << "<!DOCTYPE html><html lang=\"en\"><head>"
-       << "<meta charset=\"UTF-8\">"
-       << "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
-       << "<title>Index of " << path << "</title>"
-       << WEBSERV_STYLE
-       << "<div class=\"container\">"
-       << "<h1>Index of " << path << "</h1><hr>"
-       << "<div class=\"list\">"
-       << "<div class=\"item\"><a href=\"../\">../</a></div>";
+    ss << "<!DOCTYPE html><html><head>";
+    ss << "<title>Index of " << path << "</title>";
+    ss << STYLE;
+    ss << "</head><body>";
+    ss << "<div class=c>";
+    ss << "<h1>Index of " << path << "</h1><hr>";
+    ss << "<div class=l>";
+    ss << "<div class=i><a href=../>../</a></div>";
 
-    for (size_t i = 0; i < entries.size(); i++)
-        ss << "<div class=\"item\"><a href=\"" << entries[i] << "\">" << entries[i] << "</a></div>";
+    for (size_t i = 0; i < entries.size(); i++) {
+        ss << "<div class=i><a href=" << entries[i] << ">";
+        ss << entries[i] << "</a></div>";
+    }
 
     ss << "</div></div></body></html>";
 
@@ -105,11 +106,16 @@ Response    ResponseBuilder::handleRedirect(int status_code, const std::string& 
     response.setLocation(url);
 
     std::stringstream body;
-    body << "<html><head><title>Redirect</title></head>";
-    body << "<body><h1>Redirecting...</h1>";
-    body << "<p>You are being redirected to: " << url << "</p>";
-    body << "</body></html>";
-    
+    body << "<!DOCTYPE html><html><head>";
+    body << "<title>Redirect</title>";
+    body << STYLE;
+    body << "</head><body>";
+    body << "<div class=e>";
+    body << "<h1 style=\"font-size:3rem\">Redirecting...</h1>";
+    body << "<hr>";
+    body << "<p>You are being redirected to: <br>" << url << "</p>";
+    body << "</div></body></html>";
+
     response.writeStringToBuffer(body.str());
 
     return response;

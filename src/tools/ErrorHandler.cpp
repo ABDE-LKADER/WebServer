@@ -1,6 +1,7 @@
 #include "ErrorHandler.hpp"
 #include "ResponseBuilder.hpp"
 #include <sstream>
+#include "Style.hpp"
 
 ErrorHandler::ErrorHandler(const ServerConfig& config) : server_config(config) {
 }
@@ -43,18 +44,18 @@ std::string ErrorHandler::generateDefaultErrorPage(int error_code) const {
     std::string error_message = Response.getStatusText(error_code);
 
     std::stringstream ss;
-    
 
-    ss << "<!DOCTYPE html>\n";
-    ss << "<html>\n";
-    ss << "<head>\n";
-    ss << "    <title>" << error_code << " " << error_message << "</title>\n";
-    ss << "</head>\n";
-    ss << "<body>\n";
-    ss << "    <h1>" << error_code << "</h1>\n";
-    ss << "    <p>" << error_message << "</p>\n";
-    ss << "</body>\n";
-    ss << "</html>\n";
+    ss << "<!DOCTYPE html><html><head>";
+    ss << "<title>" << error_code << " " << error_message << "</title>";
+    ss << STYLE;
+    ss << "</head><body>";
+    ss << "<div class=e>";
+    ss << "<h1>" << error_code << "</h1>";
+    ss << "<hr>";
+    ss << "<p>" << error_message << "</p>";
+    ss << "</div>";
+    ss << "<div class=f>webserv</div>";
+    ss << "</body></html>";
 
     return ss.str();
 }

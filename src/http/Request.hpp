@@ -3,6 +3,7 @@
 
 # include <string>
 # include <vector>
+# include <iostream>
 # include "ConfigParser.hpp"
 # include "Location.hpp"
 
@@ -13,6 +14,11 @@ class Request
 	public:
 		Request( void );
 		~Request( void );
+
+		Request( ServerConfig &server );
+		
+		bool					longestPrefixMatch( void );
+		void					setLocationPath( void);
 
 		std::string				recv;
 		std::string				full_path;

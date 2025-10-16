@@ -14,3 +14,6 @@ Need To Handle In The URI:
     + Fragment (“#”) must not be present in a Request-URI. unsafe -> 400
     + Reserved characters : ; / ? : @ = &. In HTTP, inside path and query, / ; ? are reserved
         %2F, %3F, %3B etc., decoding them is still allowed by RFC 1945 (server must decode);
+
+Need To Handle In The Headers:
+    + CRLF CRLF Directly After RL;
