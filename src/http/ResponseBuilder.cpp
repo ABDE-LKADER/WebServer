@@ -80,7 +80,7 @@ Response ResponseBuilder::buildResponse(Request& request) {
         if (request.method == "GET") {
             return handleGet(request, request.location);
         } else if (request.method == "DELETE") {
-            return handleDelete(request.full_path);
+            return handleDelete(request.path);
         }
         
         // should never reach here
@@ -123,7 +123,7 @@ Response    ResponseBuilder::handleRedirect(int status_code, const std::string& 
 
 Response ResponseBuilder::handleGet(const Request& request, const Location& location) {
     Response response;
-    const std::string full_path = request.full_path;
+    const std::string full_path = request.path;
 
     // Check if path exists
     if (! static_handler.fileExists(full_path)) {

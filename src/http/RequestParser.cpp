@@ -94,13 +94,13 @@ std::string	RequestParser::removeDotSegment( std::string in ) {
 	std::string			out;
 
 	while (!in.empty()) {
-		if (in.rfind("./", 0) == 0) in.erase(0, 2);
-		else if (in.rfind("../", 0) == 0) in.erase(0, 3);
+		if (!in.rfind("./", 0)) in.erase(0, 2);
+		else if (!in.rfind("../", 0)) in.erase(0, 3);
 
-		else if (in.rfind("/./", 0) == 0 || in == "/.")
+		else if (!in.rfind("/./", 0) || in == "/.")
 			in.replace(0, (in == "/.") ? 2 : 3, "/");
 
-		else if (in.rfind("/../", 0) == 0 || in == "/..") {
+		else if (!in.rfind("/../", 0) || in == "/..") {
 			in.replace(0, (in == "/..") ? 3 : 4, "/");
 
 			size_t		pos = out.find_last_of('/');
@@ -201,8 +201,6 @@ State	RequestParser::requestLineParser( Request &request ) {
 	if (versionParser(request.version, code) == false) return State(code, BAD);
 
 	if (streamLine >> extra) return State(400, BAD);
-
-	request.full_path = "." + request.target;
 
 	return State(0, READING_HEADERS);
 }

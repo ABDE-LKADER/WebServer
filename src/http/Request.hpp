@@ -7,7 +7,18 @@
 # include "ConfigParser.hpp"
 # include "Location.hpp"
 
+/*
+// if you want alias-like behavior:
+const std::string& prefix = longest; // save it from the loop
+std::string tail = (target.size() >= prefix.size())
+                   ? target.substr(prefix.size())
+                   : std::string();
+if (!tail.empty() && tail[0] != '/') tail.insert(0, "/");
+path = location.getRoot() + tail;
+*/
+
 typedef std::map<std::string, std::string> map_t;
+typedef std::map<std::string, Location> map_location;
 
 class Request
 {
@@ -17,11 +28,11 @@ class Request
 
 		Request( ServerConfig &server );
 		
-		bool					longestPrefixMatch( void );
+		void					longestPrefixMatch( void );
 		void					setLocationPath( void);
 
 		std::string				recv;
-		std::string				full_path;
+		std::string				path;
 		std::string				query;
 
 		std::string				method;

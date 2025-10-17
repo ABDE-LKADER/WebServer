@@ -7,24 +7,48 @@ Request::Request( ServerConfig &serv ) : server(serv),
 
 Request::~Request( void ) { }
 
-void	Request::start( void ) {
-	;
+std::string	joinPath ( const std::string &root, const std::string &target ) {
+	if (root.empty()) return target;
+	if (target.empty()) return root;
+
+	if (root[root.size() - 1] == '/' && target[0] == '/')
+		return root + target.substr(1);
+
+	if (root[root.size() - 1] != '/' && target[0] != '/')
+		return root + "/" + target;
+
+	return root + target;
 }
 
-bool	Request::longestPrefixMatch( void ) {
-	// const std::map<std::string, Location>	locations = server.getLocations();
+void	Request::longestPrefixMatch( void ) {
+	std::string			longest = "/";
 
-	// for (std::map<std::string, Location>::const_iterator curr = locations.begin();
-	// 		curr != locations.end(); curr++) {
-	// 			;
-	// }
+	const map_location	&locations = server.getLocations();
 
-	location = server.getLocations().find("/")->second;
-	return true;
+	for (map_location::const_iterator curr = locations.begin();
+			curr != locations.end(); curr++) {
+		const std::string		&prefix = curr->first;
+
+		if (prefix.size() <= longest.size()) continue ;
+		if (target.size() < prefix.size()) continue ;
+		if (target.rfind(prefix, 0)) continue ;
+
+		if (target.size() != prefix.size() && target[prefix.size()] != '/'
+				&& prefix[prefix.size() - 1] != '/') continue ;
+
+		longest = prefix;
+	}
+
+	map_location::const_iterator	hit = locations.find(longest);
+
+	if (hit != locations.end()) location = hit->second;
+	else if (!locations.empty()) location = locations.begin()->second;
 }
 
 void	Request::setLocationPath( void ) {
 	longestPrefixMatch();
 
-	std::cout << target << std::endl;
+	path = joinPath(location.getRoot(), target);
+	/* I Will Join The Path Here*/
+	std::cout << path << std::endl;
 }
