@@ -61,12 +61,12 @@ std::string Response::getStatusText(int code) {
         case 201: return "Created";
         case 202: return "Accepted";
         case 204: return "No Content";
-        
+
         // 3xx Redirection
         case 301: return "Moved Permanently";
         case 302: return "Found";
         case 303: return "See Other";
-        
+
         // 4xx Client Error
         case 400: return "Bad Request";
         case 401: return "Unauthorized";
@@ -77,12 +77,13 @@ std::string Response::getStatusText(int code) {
         case 413: return "Payload Too Large";
         case 414: return "URI Too Long";
         case 415: return "Unsupported Media Type";
-        
+        case 431: return "Request Header Fields Too Large";
+
         // 5xx Server Error
         case 500: return "Internal Server Error";
         case 501: return "Not Implemented";
         case 505: return "HTTP Version Not Supported";
-        
+
         default: return "Unknown";
     }
 }

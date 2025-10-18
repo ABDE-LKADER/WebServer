@@ -1,6 +1,10 @@
+#include "CgiHandler.hpp"
 # include "Request.hpp"
 # include "ResponseBuilder.hpp"
 # include "Style.hpp"
+#include <cstddef>
+#include <ostream>
+#include <string>
 
 ResponseBuilder::ResponseBuilder(const ServerConfig& config):
     error_handler (config) {
@@ -60,21 +64,40 @@ Response ResponseBuilder::handleAutoIndex(const std::string& path) const {
     return response;
 }
 
+bool ResponseBuilder::isCgiRequest(const std::string& path, const Location& location) const {
+    size_t dot_pos = path.find_last_of(".");
+    if (dot_pos == std::string::npos) {
+        return false;
+    }
+
+    std::string extension = path.substr(dot_pos);
+
+    const std::map<std::string, std::string>& cgi_map = location.getCgi();
+
+    return cgi_map.find(extension) != cgi_map.end();
+}
+
 Response ResponseBuilder::buildResponse(Request& request) {
     try {
-        // check if METHOD is allowed in location
-        if (!isMethodAllowed(request.method, request.location)) {
-            Response response;
-            response.setStatusCode(405);
-            response.setContentType("text/html");
-            response.writeStringToBuffer(error_handler.generateErrorResponse(405));
-            return response;
-        }
-
         // check for redirection
         if (request.location.getReturn().first != 0) {
             return handleRedirect(request.location.getReturn().first, request.location.getReturn().second);
         }
+
+        // Check if it's a CGI request
+        if (isCgiRequest(request.path, request.location)) {
+            return handleCgi (request);
+            // handle CGI
+// NOTE: test block
+std::cout << "Inside isGgiRequest: if this line is reach the request is an executable" << std::endl;
+Response response;
+response.setStatusCode(900);
+response.setContentType("text/html");
+response.writeStringToBuffer("<body>Inside Cgi</body>");
+return response;
+// NOTE: test block end
+        }
+
 
         // route to handlers
         if (request.method == "GET") {
@@ -209,3 +232,9 @@ Response ResponseBuilder::handleDelete(std::string full_path) {
 
     return response;
 }
+
+Response ResponseBuilder::handleCgi(Request& request) {
+    CgiHandler cgi_handler(request, request.location);
+    return cgi_handler.execute();
+}
+
