@@ -234,14 +234,6 @@ Response ResponseBuilder::handleDelete(std::string full_path) {
 
 Response ResponseBuilder::handleCgi(Request& request) {
     CgiHandler cgi_handler(request, request.location);
-    // exexute cgi and return resonse
-
-
-
-// NOTE: test response
-Response response;
-response.setStatusCode(999);
-response.writeStringToBuffer("<body>handle CGI block</doby>");
-return response;
+    return cgi_handler.execute();
 }
 
