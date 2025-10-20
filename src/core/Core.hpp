@@ -44,7 +44,7 @@ typedef std::vector< std::pair<std::string, std::string> > vector_pairs;
 
 // ------------------------- Webserv Macros -------------------------//
 
-# define BUF_SIZE 1024
+# define BUF_SIZE 8000000
 # define MAX_EVENTS 1024
 
 # define ERROR -1

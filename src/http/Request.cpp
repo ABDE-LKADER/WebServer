@@ -3,7 +3,7 @@
 Request::Request( void ) { }
 
 Request::Request( ServerConfig &serv ) : server(serv),
-		has_content_length(false), content_length(0) { }
+		has_conlen(false), content_length(0) { }
 
 Request::~Request( void ) { }
 
@@ -16,6 +16,10 @@ bool	Request::isMethodAllowed( void ) {
 		if (allowed[index] == method) return true;
 
 	return false;
+}
+
+bool	Request::isValidHeaders( void ) {
+	return true;
 }
 
 std::string	joinPath ( const std::string &root, const std::string &target ) {
@@ -70,12 +74,19 @@ State	Request::startProssessing( void ) {
 }
 
 State	Request::streamBodies( void ) {
-	std::cout << "BODY: " << std::endl;
-	std::cout << recv << std::endl;
+	std::ofstream		outfile(path.c_str());
 
-	StaticFileHandler		handler;
+	if (!outfile.is_open()) return State(500, BAD);
 
-	if (!handler.fileExists(path)) return State(502, BAD);
+	if (recv.length() >= content_length) {
+		outfile << recv;
+		content_length -= recv.length();
+	}
+	else if (!content_length) {
+		outfile << recv.substr(0, content_length);
+		content_length = 0;
+		return State(0, READY_TO_WRITE);
+	}
 
-	return State(0, READY_TO_WRITE);
+	return State(0, READING_BODY);
 }

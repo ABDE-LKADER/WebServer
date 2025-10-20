@@ -1067,7 +1067,7 @@
                 });
                 
                 // Send POST request with file data in body
-                xhr.open('POST', '/uploads', true);
+                xhr.open('POST', '/uploads/' + selectedFile.name, true);
                 xhr.setRequestHeader('Content-Length', e.target.result.byteLength.toString());
                 xhr.setRequestHeader('X-Filename', selectedFile.name);
                 xhr.send(e.target.result);

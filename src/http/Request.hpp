@@ -40,17 +40,18 @@ class Request
 		std::string				target;
 		std::string				version;
 
+		ServerConfig			server;
 		map_t					headers;
 		Location				location;
-		ServerConfig			server;
 
-		bool					has_content_length;
+		bool					has_conlen;
 		size_t					content_length;
 
-		std::string				longestPrefixMatch( void );
-		State					startProssessing( void );
-		bool					isMethodAllowed( void );
 		State					streamBodies( void );
+		bool					isValidHeaders( void );
+		bool					isMethodAllowed( void );
+		State					startProssessing( void );
+		std::string				longestPrefixMatch( void );
 };
 
 #endif

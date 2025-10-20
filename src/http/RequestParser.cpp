@@ -254,9 +254,32 @@ State	RequestParser::headersParser( Request &request ) {
 		}
 
 		if (name == "transfer-encoding") return State(400, BAD);
+
+		if (name == "content-length") {
+			if (value.empty()) return State(400, BAD);
+
+			if (value.find_first_not_of("0123456789") != std::string::npos)
+				return State(400, BAD);
+
+			std::stringstream		convert(value);
+
+			request.has_conlen = true;
+			convert >> request.content_length;
+			if (convert.fail()) return State(400, BAD);
+
+			size_t	max_size = request.server.getMaxClientBodySize();
+			if (request.content_length > max_size) return State(413, BAD);
+		}
+
 		request.headers[name] = value;
 	}
 
-	if (request.method == "POST") return State(0, READING_BODY);
+	std::cout << "Content Lenght: " << request.content_length << std::endl;
+
+	if (request.method == "POST") {
+		if (request.has_conlen == false) return State(400, BAD);
+		return State(0, READING_BODY);
+	}
+
 	return State(0, READY_TO_WRITE);
 }

@@ -29,10 +29,10 @@ void	Connection::requestProssessing( void ) {
 			status = RequestParser::requestLineParser(request);
 
 		if (getState() == READING_HEADERS)
-			status = RequestParser::headersParser(request);
+			status = request.startProssessing();
 
 		if (getState() == READING_HEADERS)
-			status = request.startProssessing();
+			status = RequestParser::headersParser(request);
 
 		if (getState() == READING_BODY)
 			status = request.streamBodies();
