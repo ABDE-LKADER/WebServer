@@ -52,72 +52,79 @@ std::string	Request::longestPrefixMatch( void ) {
 	return longest;
 }
 
-State	Request::isValidHeaders( void ) {
+void	Request::isValidHeaders( void ) {
 	if (headers.find("transfer-encoding") != headers.end())
-		return State(400, BAD);
+		throw State(400, BAD);
 
-	if (method != "POST") return State(0, READY_TO_WRITE);
+	if (method != "POST") return ;
 
 	map_t::iterator		headerIter = headers.find("content-length");
 
-	if (headerIter == headers.end()) return State(400, BAD);
+	if (headerIter == headers.end()) throw State(400, BAD);
 
 	std::string		value = headerIter->second;
 
-	if (value.empty()) return State(400, BAD);
+	if (value.empty()) throw State(400, BAD);
 
 	if (value.find_first_not_of("0123456789") != std::string::npos)
-		return State(400, BAD);
+		throw State(400, BAD);
 
 	std::stringstream		convert(value);
 
 	has_conlen = true;
 	convert >> content_length;
-	if (convert.fail()) return State(400, BAD);
+	if (convert.fail()) throw State(400, BAD);
 
 	size_t	max_size = server.getMaxClientBodySize();
-	if (content_length > max_size) return State(413, BAD);
+	if (content_length > max_size) throw State(413, BAD);
 
-	// headerIter = headers.find("content-type");
-	// if (headerIter != headers.end()) {
-	// 	;
-	// }
-
-	return State(0, READING_BODY);
+	headerIter = headers.find("content-type");
+	if (headerIter != headers.end()) {
+		;
+	}
 }
 
-State	Request::startProssessing( void ) {
+void	Request::startProssessing( void ) {
 	const map_location				&locations = server.getLocations();
 	std::string						longestM = longestPrefixMatch();
 	map_location::const_iterator	hit = locations.find(longestM);
 
 	if (hit != locations.end()) location = hit->second;
-	else return State(404, BAD);
+	else throw State(404, BAD);
 
-	if (!isMethodAllowed()) return State(405, BAD);
+	if (!isMethodAllowed()) throw State(405, BAD);
 
-	path = target.substr(longestM.size());
-	path = joinPath(location.getRoot(), path);
+	std::cout << "startProssessing ..." << std::endl;
+	if (method == "POST") {
+		/* For Handling POST Requirement PATH UPLOAD*/
+		path = joinPath(location.getUploadLocation(), target);
+	}
+
+	else {
+		path = target.substr(longestM.size());
+		path = joinPath(location.getRoot(), path);
+	}
 
 	std::cout << "[ " << longestM << " ]"
+			  << "[ " << content_length << " ]"
 				 "[ " << path << " ]" << std::endl;
 
-	return State(0, READING_HEADERS);
+	if (method != "POST") throw State(0, READY_TO_WRITE);
 }
 
-State	Request::streamBodies( void ) {
+void	Request::streamBodies( void ) {
 	std::ofstream		outfile(path.c_str());
 
-	if (!outfile.is_open()) return State(500, BAD);
+	if (!outfile.is_open()) throw State(500, BAD);
 
-	if (recv.length() >= content_length) {
+	if (recv.length() > content_length) {
 		outfile << recv;
 		content_length -= recv.length();
-	}
-	else if (!content_length) {
-		outfile << recv.substr(0, content_length);
-		return (outfile.close(), State(0, READY_TO_WRITE));
+		return ;
 	}
 
-	return State(0, READING_BODY);
+	outfile << recv.substr(0, content_length);
+	outfile.close();
+
+	throw State(0, READY_TO_WRITE);
 }

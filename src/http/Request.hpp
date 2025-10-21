@@ -31,10 +31,10 @@ class Request
 		bool					has_conlen;
 		size_t					content_length;
 
-		State					streamBodies( void );
-		State					isValidHeaders( void );
+		void					streamBodies( void );
+		void					isValidHeaders( void );
 		bool					isMethodAllowed( void );
-		State					startProssessing( void );
+		void					startProssessing( void );
 		std::string				longestPrefixMatch( void );
 };
 

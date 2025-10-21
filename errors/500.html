@@ -30,6 +30,7 @@
             height: 100%;
             opacity: 0.1;
             z-index: 1;
+            pointer-events: none;
             background: repeating-linear-gradient(
                 0deg,
                 transparent 0px,
@@ -37,15 +38,7 @@
                 #ff3333 2px,
                 #ff3333 4px
             );
-            animation: scroll 20s linear infinite;
-        }
-        
-        @keyframes scroll {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(20px); }
-        }
-        
-        .container {
+        }        .container {
             position: relative;
             z-index: 2;
             display: flex;
@@ -66,8 +59,17 @@
                 0 0 20px #ff0000,
                 0 0 40px #ff0000;
             animation: flicker 2s infinite;
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
             filter: brightness(1.2);
+        }
+        
+        .divider {
+            width: 80%;
+            max-width: 600px;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #ff3333, transparent);
+            margin: 1.5rem auto;
+            opacity: 0.6;
         }
         
         @keyframes flicker {
@@ -86,11 +88,19 @@
         
         .error-title {
             font-size: clamp(1.5rem, 4vw, 3rem);
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.5rem;
             color: #ffaaaa;
             text-transform: uppercase;
             letter-spacing: 0.2em;
             animation: pulse 2s infinite;
+        }
+        
+        .error-subtitle {
+            font-size: clamp(0.9rem, 2vw, 1.2rem);
+            margin-bottom: 2rem;
+            color: #ff9999;
+            font-weight: 300;
+            letter-spacing: 0.1em;
         }
         
         .error-message {
@@ -217,11 +227,9 @@
     <div class="error-lines"></div>
     <div class="container">
         <div class="error-code">500</div>
+        <div class="divider"></div>
         <h1 class="error-title">SYSTEM ERROR</h1>
-        <p class="error-message">
-            Internal server error occurred. The system has encountered an unexpected condition.<br>
-            Please try again later or contact the administrator.
-        </p>
+        <div class="error-subtitle">Internal Server Error</div>
         
         <div class="terminal">
             <div class="terminal-header">

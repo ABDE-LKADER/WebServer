@@ -14,39 +14,31 @@
         }
         
         body {
-            background: linear-gradient(135deg, #1a0d2e 0%, #2d1b45 50%, #4a2c2a 100%);
+            background: linear-gradient(135deg, #1a0a2e 0%, #2e1a47 50%, #4a1a4a 100%);
             font-family: 'Fira Code', 'Courier New', monospace;
-            color: #e94560;
-            min-height: 100vh;
-            overflow-x: hidden;
-            overflow-y: auto;
+            color: #c77dff;
+            height: 100vh;
+            overflow: hidden;
             position: relative;
         }
         
-        .circuit-pattern {
+        .error-lines {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            opacity: 0.08;
+            opacity: 0.1;
             z-index: 1;
-            background-image: 
-                radial-gradient(circle at 20% 80%, rgba(233, 69, 96, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(233, 69, 96, 0.3) 0%, transparent 50%),
-                repeating-linear-gradient(0deg, transparent, transparent 98px, rgba(233, 69, 96, 0.1) 100px);
-            animation: circuit-flow 8s linear infinite;
-        }
-        
-        @keyframes circuit-flow {
-            0% { transform: translateX(0) translateY(0); }
-            25% { transform: translateX(-10px) translateY(5px); }
-            50% { transform: translateX(10px) translateY(-5px); }
-            75% { transform: translateX(-5px) translateY(10px); }
-            100% { transform: translateX(0) translateY(0); }
-        }
-        
-        .container {
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent 0px,
+                transparent 2px,
+                #c77dff 2px,
+                #c77dff 4px
+            );
+        }        .container {
             position: relative;
             z-index: 2;
             display: flex;
@@ -62,173 +54,156 @@
         .error-code {
             font-size: clamp(4rem, 15vw, 12rem);
             font-weight: 700;
-            color: #e94560;
+            color: #c77dff;
             text-shadow: 
-                0 0 20px #e94560,
-                0 0 40px #e94560,
-                0 0 80px #c73650;
-            margin-bottom: 2rem;
+                0 0 20px #c77dff,
+                0 0 40px #c77dff,
+                0 0 80px #9d4edd;
+            margin-bottom: 1rem;
             animation: neon-flicker 3s ease-in-out infinite;
+        }
+        
+        .divider {
+            width: 80%;
+            max-width: 600px;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #c77dff, transparent);
+            margin: 1.5rem auto;
+            opacity: 0.6;
         }
         
         @keyframes neon-flicker {
             0%, 100% {
                 text-shadow: 
-                    0 0 20px #e94560,
-                    0 0 40px #e94560,
-                    0 0 80px #c73650;
+                    0 0 20px #c77dff,
+                    0 0 40px #c77dff,
+                    0 0 80px #9d4edd;
             }
             50% {
                 text-shadow: 
-                    0 0 10px #e94560,
-                    0 0 20px #e94560,
-                    0 0 40px #c73650;
+                    0 0 10px #c77dff,
+                    0 0 20px #c77dff,
+                    0 0 40px #9d4edd;
             }
         }
         
         .error-title {
             font-size: clamp(1.5rem, 4vw, 3rem);
-            margin-bottom: 1.5rem;
-            color: #ff6b9d;
+            margin-bottom: 0.5rem;
+            color: #8b5cf6;
             text-transform: uppercase;
             letter-spacing: 0.2em;
-            position: relative;
+            animation: pulse 2s infinite;
         }
         
-        .error-title::before {
-            content: "⛔";
-            position: absolute;
-            left: -2.5em;
-            animation: spin 3s linear infinite;
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
         
-        .error-title::after {
-            content: "⛔";
-            position: absolute;
-            right: -2.5em;
-            animation: spin 3s linear infinite reverse;
-        }
-        
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        .error-subtitle {
+            font-size: clamp(0.9rem, 2vw, 1.2rem);
+            margin-bottom: 2rem;
+            color: #a78bfa;
+            font-weight: 300;
+            letter-spacing: 0.1em;
         }
         
         .error-message {
             font-size: clamp(1rem, 2.5vw, 1.5rem);
             margin-bottom: 2rem;
-            color: #c9a9dd;
+            color: #a78bfa;
             max-width: 800px;
             line-height: 1.6;
         }
         
-        .method-panel {
+        .terminal {
             background: rgba(0, 0, 0, 0.9);
-            border: 2px solid #e94560;
+            border: 2px solid #c77dff;
             border-radius: 10px;
             padding: 20px;
             margin: 2rem 0;
-            max-width: 90vw;
-            width: 100%;
-            max-width: 650px;
+            max-width: 700px;
             text-align: left;
             box-shadow: 
-                0 0 20px rgba(233, 69, 96, 0.3),
-                inset 0 0 20px rgba(233, 69, 96, 0.1);
-            position: relative;
-            box-sizing: border-box;
+                0 0 20px rgba(199, 125, 255, 0.3),
+                inset 0 0 20px rgba(199, 125, 255, 0.1);
         }
         
-        .panel-header {
+        .terminal-header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
             padding-bottom: 10px;
             border-bottom: 1px solid #444;
         }
         
-        .panel-title {
-            color: #e94560;
-            font-size: 1rem;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        
-        .status-indicator {
+        .terminal-button {
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background: #e94560;
-            animation: pulse-error 1.5s infinite;
+            margin-right: 8px;
         }
         
-        @keyframes pulse-error {
-            0%, 100% { 
-                opacity: 1;
-                box-shadow: 0 0 0 0 rgba(233, 69, 96, 0.7);
-            }
-            70% { 
-                opacity: 0.7;
-                box-shadow: 0 0 0 10px rgba(233, 69, 96, 0);
-            }
-        }
+        .close { background: #ff5555; }
+        .minimize { background: #ffbb33; }
+        .maximize { background: #00ff41; }
         
-        .panel-content {
-            font-family: 'Fira Code', monospace;
+        .terminal-title {
+            color: #c77dff;
             font-size: 0.9rem;
-            line-height: 1.5;
+            margin-left: 15px;
         }
         
-        .method-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 10px;
-            margin: 15px 0;
-        }
-        
-        .method-item {
-            display: flex;
-            align-items: center;
-            padding: 8px;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-        }
-        
-        .method-allowed {
-            background: rgba(0, 255, 0, 0.1);
-            border-left: 3px solid #00ff00;
-        }
-        
-        .method-denied {
-            background: rgba(255, 0, 0, 0.1);
-            border-left: 3px solid #ff0000;
-        }
-        
-        .method-icon {
-            margin-right: 10px;
-            font-size: 1.2em;
-        }
-        
-        .allowed { color: #00ff00; }
-        .denied { color: #ff4444; }
-        
-        .request-info {
-            background: rgba(233, 69, 96, 0.1);
-            border-radius: 5px;
-            padding: 15px;
-            margin: 15px 0;
+        .terminal-content {
             font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            line-height: 1.4;
         }
         
-        .info-line {
-            margin: 5px 0;
-            color: #ff9bb3;
+        .prompt {
+            color: #c77dff;
         }
         
-        .highlight {
-            color: #e94560;
+        .command {
+            color: #ffffff;
+        }
+        
+        .output {
+            color: #999;
+            margin-left: 20px;
+        }
+        
+        .cursor {
+            display: inline-block;
+            background: #c77dff;
+            width: 8px;
+            height: 1.2em;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .method-text {
+            color: #a78bfa;
+        }
+        
+        .denied {
+            color: #ff6666;
             font-weight: bold;
+            animation: warning-flash 1.5s infinite;
+        }
+        
+        @keyframes warning-flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        .allowed {
+            color: #00ff88;
         }
         
         @keyframes pulse {
@@ -247,8 +222,8 @@
         
         .back-button {
             display: inline-block;
-            background: linear-gradient(45deg, #e94560, #c73650);
-            color: #fff;
+            background: linear-gradient(45deg, #c77dff, #9d4edd);
+            color: #000;
             text-decoration: none;
             padding: 12px 24px;
             border-radius: 5px;
@@ -257,114 +232,44 @@
             letter-spacing: 1px;
             transition: all 0.3s ease;
             margin-top: 2rem;
-            box-shadow: 0 0 15px rgba(233, 69, 96, 0.3);
+            box-shadow: 0 0 15px rgba(199, 125, 255, 0.3);
         }
         
         .back-button:hover {
-            background: linear-gradient(45deg, #c73650, #e94560);
-            box-shadow: 0 0 25px rgba(233, 69, 96, 0.6);
+            background: linear-gradient(45deg, #9d4edd, #c77dff);
+            box-shadow: 0 0 25px rgba(199, 125, 255, 0.6);
             transform: translateY(-2px);
         }
         
         @media (max-width: 768px) {
-            .method-panel {
-                margin: 1rem 0;
+            .terminal {
+                margin: 1rem;
                 padding: 15px;
-                max-width: 95vw;
-            }
-            
-            .method-list {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 8px;
-            }
-            
-            .container {
-                padding: 10px;
-            }
-            
-            .error-code {
-                font-size: clamp(3rem, 12vw, 8rem);
-            }
-            
-            .error-title {
-                font-size: clamp(1.2rem, 3vw, 2rem);
-            }
-            
-            .error-message {
-                font-size: clamp(0.9rem, 2vw, 1.2rem);
-            }
-            
-            .request-info {
-                font-size: 0.8rem;
-                padding: 10px;
-            }
-            
-            .method-item {
-                padding: 6px;
-                font-size: 0.8rem;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .method-list {
-                grid-template-columns: 1fr;
-            }
-            
-            .error-title::before,
-            .error-title::after {
-                display: none;
             }
         }
     </style>
 </head>
 <body>
-    <div class="circuit-pattern"></div>
+    <div class="error-lines"></div>
     <div class="container">
         <div class="error-code">405</div>
-        <h1 class="error-title">METHOD NOT ALLOWED</h1>
-        <p class="error-message">
-            The request method is not supported for the requested resource.<br>
-            Please check the allowed methods and try again with a valid HTTP method.
-        </p>
+        <div class="divider"></div>
+        <h1 class="error-title">Method Not Allowed</h1>
+        <div class="error-subtitle">Invalid HTTP Method</div>
         
-        <div class="method-panel">
-            <div class="panel-header">
-                <div class="panel-title">HTTP Method Analysis</div>
-                <div class="status-indicator"></div>
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="terminal-button close"></div>
+                <div class="terminal-button minimize"></div>
+                <div class="terminal-button maximize"></div>
+                <div class="terminal-title">METHOD VALIDATOR - webserv</div>
             </div>
-            <div class="panel-content">
-                <div class="request-info">
-                    <div class="info-line">Requested Method: <span class="highlight denied">PATCH</span></div>
-                    <div class="info-line">Resource: <span class="highlight">/api/users/123</span></div>
-                    <div class="info-line">Status: <span class="highlight denied">REJECTED</span></div>
-                </div>
-                
-                <div class="method-list">
-                    <div class="method-item method-allowed">
-                        <span class="method-icon allowed">✓</span>
-                        <span class="allowed">GET</span>
-                    </div>
-                    <div class="method-item method-allowed">
-                        <span class="method-icon allowed">✓</span>
-                        <span class="allowed">POST</span>
-                    </div>
-                    <div class="method-item method-allowed">
-                        <span class="method-icon allowed">✓</span>
-                        <span class="allowed">DELETE</span>
-                    </div>
-                    <div class="method-item method-denied">
-                        <span class="method-icon denied">✗</span>
-                        <span class="denied">PUT</span>
-                    </div>
-                    <div class="method-item method-denied">
-                        <span class="method-icon denied">✗</span>
-                        <span class="denied">PATCH</span>
-                    </div>
-                    <div class="method-item method-denied">
-                        <span class="method-icon denied">✗</span>
-                        <span class="denied">OPTIONS</span>
-                    </div>
-                </div>
+            <div class="terminal-content">
+                <div><span class="prompt">[METHOD]</span> <span class="method-text">Request: </span><span class="denied">PATCH</span></div>
+                <div><span class="prompt">[ALLOWED]</span> <span class="allowed">GET, POST, DELETE</span></div>
+                <div><span class="prompt">[RESOURCE]</span> <span class="method-text">/api/users/123</span></div>
+                <div><span class="prompt">[STATUS]</span> <span class="denied">REQUEST_REJECTED</span></div>
+                <div><span class="prompt">[ACTION]</span> <span class="method-text">Use allowed methods only</span></div>
             </div>
         </div>
         
@@ -372,7 +277,7 @@
     </div>
     
     <div class="footer">
-        WebServ/1.0 • HTTP Method Validator • Port 8080
+        WebServ/1.0 • C++ HTTP Server
     </div>
 </body>
 </html>

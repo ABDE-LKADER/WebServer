@@ -47,47 +47,45 @@ bool	RequestParser::isTspecials( unsigned char c ) {
 	}
 }
 
-bool	RequestParser::methodParser( std::string &method, int &code) {
-	code = 400;
+void	RequestParser::methodParser( std::string &method ) {
+	if (method.empty()) throw State(400, BAD);
 
-	if (method.empty()) return false;
-	
 	for (size_t index = 0; index < method.size(); ++index) {
 		if (isTspecials(method[index]) || isCTL(method[index]))
-			return false;
+			throw State(400, BAD);
 	}
 
-	if (isValidMethod(method)) return true;
-	if (isValidMethod(strToUpper(method))) return false;
-	
-	return (code = 501, false);
+	if (isValidMethod(method)) return ;
+	if (isValidMethod(strToUpper(method))) throw State(400, BAD);
+
+	throw State(501, BAD);
 }
 
-bool	RequestParser::decodeValidator( std::string &string, bool is_query ) {
+void	RequestParser::decodeValidator( std::string &string, bool is_query ) {
 	std::string		decoded;
 
 	for (size_t index = 0; index < string.size(); ++index) {
 		char		curr = string[index];
 
-		if (containsChar(curr, " \t\\#")) return false;
+		if (containsChar(curr, " \t\\#")) throw State(400, BAD);
 
 		if (curr == '%') {
-			if (index + 2 >= string.size()) return false;
-			if (!std::isxdigit(string[index + 1])) return false;
-			if (!std::isxdigit(string[index + 2])) return false;
-	
+			if (index + 2 >= string.size()) throw State(400, BAD);
+			if (!std::isxdigit(string[index + 1])) throw State(400, BAD);
+			if (!std::isxdigit(string[index + 2])) throw State(400, BAD);
+
 			curr = hexToChar(string.substr(index + 1, 2));
 			index += 2;
 		}
 
-		if (is_query && isCTL(curr) && curr != '\t') return false;
-		if (!is_query && isCTL(curr)) return false;
-		if (!is_query && containsChar(curr, " \t\\#")) return false;
+		if (is_query && isCTL(curr) && curr != '\t') throw State(400, BAD);
+		if (!is_query && isCTL(curr)) throw State(400, BAD);
+		if (!is_query && containsChar(curr, " \t\\#")) throw State(400, BAD);
 
 		decoded += curr;
 	}
 
-	return (string = decoded, true);
+	string = decoded;
 }
 
 std::string	RequestParser::removeDotSegment( std::string in ) {
@@ -105,11 +103,10 @@ std::string	RequestParser::removeDotSegment( std::string in ) {
 
 			size_t		pos = out.find_last_of('/');
 			if (pos != std::string::npos) out.erase(pos);
-			else throw ERROR;
+			else throw State(400, BAD);
 		}
 
-		else if (in == "." || in == "..")
-			in.clear();
+		else if (in == "." || in == "..") in.clear();
 
 		else {
 			size_t		pos = in.find('/', 1);
@@ -123,8 +120,8 @@ std::string	RequestParser::removeDotSegment( std::string in ) {
 	return out;
 }
 
-bool	RequestParser::targetParser( std::string &target, std::string &query ) {
-	if(target.empty() || target[0] != '/') return false;
+void	RequestParser::targetParser( std::string &target, std::string &query ) {
+	if(target.empty() || target[0] != '/') throw State(400, BAD);
 
 	size_t		pos;
 
@@ -133,54 +130,43 @@ bool	RequestParser::targetParser( std::string &target, std::string &query ) {
 		target.erase(pos);
 	}
 
-	if (decodeValidator(target, false) == false) return false;
-	if (decodeValidator(query, true) == false) return false;
+	decodeValidator(target, false); decodeValidator(query, true);
 
-	try {
-		if (target.find('.') != std::string::npos)
-			target = removeDotSegment(target);
-		return true;
-	}
-
-	catch ( int ) { return false; }
+	if (target.find('.') != std::string::npos)
+		target = removeDotSegment(target);
 }
 
-bool	RequestParser::versionParser( const std::string &version, int &code ) {
-	code = 400;
-
+void	RequestParser::versionParser( const std::string &version ) {
 	const std::string		prefix = "HTTP/";
 	const std::string		nums = "0123456789";
 
-	if (version.size() < prefix.size() + 3) return false;
-	if (version.compare(0, prefix.size(), prefix)) return false;
+	if (version.size() < prefix.size() + 3) throw State(400, BAD);
+	if (version.compare(0, prefix.size(), prefix)) throw State(400, BAD);
 
 	size_t			dot = version.find('.', prefix.size());
-	if (dot == std::string::npos) return false;
+	if (dot == std::string::npos) throw State(400, BAD);
 
 	std::string		major = version.substr(prefix.size(), dot - prefix.size());
 	std::string		minor = version.substr(dot + 1);
 
 	if (containsOnly(major, nums) == false || containsOnly(minor, nums) == false)
-		return false;
+		throw State(400, BAD);
 
-	if (major == "1" && (minor == "0" || minor == "1")) return true;
-
-	return (code = 505, false);
+	if (major != "1" || (minor != "0" && minor != "1")) throw State(505, BAD);
 }
 
-State	RequestParser::requestLineParser( Request &request ) {	
+void	RequestParser::requestLineParser( Request &request ) {	
 	size_t				pos;
 	const std::string	CRLF("\r\n");
 
 	if ((pos = request.recv.find(CRLF)) == std::string::npos) {
-		if (request.recv.size() > MAX_REQUEST_LINE) return State(414, BAD);
-		return State(0, REQUEST_LINE);
+		if (request.recv.size() > MAX_REQUEST_LINE) throw State(414, BAD);
+		throw State(0, REQUEST_LINE);
 	}
 
-	if (pos + CRLF.size() > MAX_REQUEST_LINE) return State(414, BAD);
+	if (pos + CRLF.size() > MAX_REQUEST_LINE) throw State(414, BAD);
 
 	std::string			line = request.recv.substr(0, pos);
-	int					code;
 
 	request.recv.erase(0, pos + CRLF.size());
 
@@ -190,35 +176,31 @@ State	RequestParser::requestLineParser( Request &request ) {
 	streamLine >> std::noskipws >> request.method >> sp
 		>> request.target >> space >> request.version;
 
-	if (streamLine.fail()) return State(400, BAD);
+	if (streamLine.fail()) throw State(400, BAD);
 
-	if (sp != ' ' || space != ' ') return State(400, BAD);
+	if (sp != ' ' || space != ' ') throw State(400, BAD);
 
-	if (methodParser(request.method, code) == false) return State(code, BAD);
+	methodParser(request.method);
+	targetParser(request.target, request.query);
+	versionParser(request.version);
 
-	if (targetParser(request.target, request.query) == false) return State(400, BAD);
-
-	if (versionParser(request.version, code) == false) return State(code, BAD);
-
-	if (streamLine >> extra) return State(400, BAD);
+	if (streamLine >> extra) throw State(400, BAD);
 
 	std::cout << "[ " << request.method << " ]"
 			  << "[ " << request.target << " ]"
 			  << "[ " << request.version << " ]" << std::endl;
-
-	return State(0, READING_HEADERS);
 }
 
-State	RequestParser::headersParser( Request &request ) {
+void	RequestParser::headersParser( Request &request ) {
 	std::string			DCRLF("\r\n\r\n");
 	size_t				pos;
 
 	if ((pos = request.recv.find(DCRLF)) == std::string::npos) {
-		if (request.recv.size() > MAX_HEADER_BYTES) return State(431, BAD);
-		return State(0, READING_HEADERS);
+		if (request.recv.size() > MAX_HEADER_BYTES) throw State(431, BAD);
+		throw State(0, READING_HEADERS);
 	}
 
-	if (pos + DCRLF.size() > MAX_HEADER_BYTES) return State(431, BAD);
+	if (pos + DCRLF.size() > MAX_HEADER_BYTES) throw State(431, BAD);
 
 	std::stringstream	headersBlock;
 
@@ -231,8 +213,8 @@ State	RequestParser::headersParser( Request &request ) {
 
 		std::string::size_type	colum = line.find(':');
 
-		if (colum == 0) return State(400, BAD);
-		if (colum == std::string::npos) return State(400, BAD);
+		if (colum == 0) throw State(400, BAD);
+		if (colum == std::string::npos) throw State(400, BAD);
 
 		std::string				name = line.substr(0, colum);
 		std::string				value = line.substr(colum + 1);
@@ -240,7 +222,7 @@ State	RequestParser::headersParser( Request &request ) {
 
 		for (index = 0; index < name.size(); ++index) {
 			if (isTspecials(name[index]) || isCTL(name[index]))
-				return State(400, BAD);
+				throw State(400, BAD);
 			name[index] = std::tolower(name[index]);
 		}
 
@@ -254,37 +236,12 @@ State	RequestParser::headersParser( Request &request ) {
 
 		for (index = 0; index < value.size(); ++index) {
 			if (isCTL(value[index]) && value[index] != '\t')
-				return State(400, BAD);
+				throw State(400, BAD);
 		}
-
-		if (name == "transfer-encoding") return State(400, BAD);
-
-		if (name == "content-length") {
-			if (value.empty()) return State(400, BAD);
-
-			if (value.find_first_not_of("0123456789") != std::string::npos)
-				return State(400, BAD);
-
-			std::stringstream		convert(value);
-
-			request.has_conlen = true;
-			convert >> request.content_length;
-			if (convert.fail()) return State(400, BAD);
-
-			size_t	max_size = request.server.getMaxClientBodySize();
-			if (request.content_length > max_size) return State(413, BAD);
-		}
-
+		
 		std::cout << "[ " << name << " ]"
-				<< "[ " << value << " ]" << std::endl;
+		<< "[ " << value << " ]" << std::endl;
 
 		request.headers[name] = value;
 	}
-
-	if (request.method == "POST") {
-		if (request.has_conlen == false) return State(400, BAD);
-		return State(0, READING_BODY);
-	}
-
-	return State(0, READY_TO_WRITE);
 }

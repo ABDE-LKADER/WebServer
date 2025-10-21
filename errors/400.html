@@ -14,7 +14,7 @@
         }
         
         body {
-            background: linear-gradient(135deg, #1a1a00 0%, #2d2d00 50%, #404000 100%);
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
             font-family: 'Fira Code', 'Courier New', monospace;
             color: #ffff00;
             height: 100vh;
@@ -22,28 +22,27 @@
             position: relative;
         }
         
-        .warning-pattern {
+        .scan-lines {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            opacity: 0.05;
             z-index: 1;
-            background-image: 
-                repeating-linear-gradient(
-                    45deg,
-                    #ffff00 0px,
-                    #ffff00 20px,
-                    transparent 20px,
-                    transparent 40px
-                );
-            animation: warning-slide 10s linear infinite;
+            background: linear-gradient(
+                transparent 50%,
+                rgba(255, 255, 255, 0.03) 50%
+            );
+            background-size: 100% 4px;
+            animation: flicker 0.15s linear infinite;
+            pointer-events: none;
         }
         
-        @keyframes warning-slide {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(40px); }
+        @keyframes flicker {
+            0% { opacity: 1; }
+            98% { opacity: 1; }
+            99% { opacity: 0.98; }
+            100% { opacity: 1; }
         }
         
         .container {
@@ -64,57 +63,61 @@
             color: #ffff00;
             text-shadow: 
                 0 0 20px #ffff00,
-                0 0 40px #ffff00,
-                0 0 80px #ffcc00;
-            margin-bottom: 2rem;
-            animation: warning-glow 2s ease-in-out infinite alternate;
+                0 0 40px #ffff00;
+            margin-bottom: 1rem;
+            position: relative;
         }
         
-        @keyframes warning-glow {
-            from {
-                text-shadow: 
-                    0 0 20px #ffff00,
-                    0 0 40px #ffff00,
-                    0 0 80px #ffcc00;
+        .error-code::before {
+            content: "400";
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: #ffff00;
+            animation: warning-scan 3s infinite;
+            opacity: 0.7;
+        }
+        
+        @keyframes warning-scan {
+            0%, 100% { 
+                transform: translateX(0);
+                opacity: 0.7;
             }
-            to {
-                text-shadow: 
-                    0 0 10px #ffff00,
-                    0 0 20px #ffff00,
-                    0 0 40px #ffcc00;
+            50% { 
+                transform: translateX(5px);
+                opacity: 1;
             }
+        }
+        
+        .divider {
+            width: 80%;
+            max-width: 600px;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #ffff00, transparent);
+            margin: 1.5rem auto;
+            opacity: 0.6;
         }
         
         .error-title {
             font-size: clamp(1.5rem, 4vw, 3rem);
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.5rem;
             color: #ffcc00;
             text-transform: uppercase;
             letter-spacing: 0.2em;
-            position: relative;
+            animation: pulse 2s infinite;
         }
         
-        .error-title::before,
-        .error-title::after {
-            content: "⚠";
-            position: absolute;
-            color: #ffff00;
-            font-size: 1.5em;
-            animation: flash 1.5s infinite;
+        .error-subtitle {
+            font-size: clamp(0.9rem, 2vw, 1.2rem);
+            margin-bottom: 2rem;
+            color: #cccc99;
+            font-weight: 300;
+            letter-spacing: 0.1em;
         }
         
-        .error-title::before {
-            left: -2em;
-        }
-        
-        .error-title::after {
-            right: -2em;
-            animation-delay: 0.75s;
-        }
-        
-        @keyframes flash {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0.3; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
         
         .error-message {
@@ -126,7 +129,7 @@
         }
         
         .debug-panel {
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             border: 2px solid #ffff00;
             border-radius: 10px;
             padding: 20px;
@@ -136,6 +139,19 @@
             box-shadow: 
                 0 0 20px rgba(255, 255, 0, 0.3),
                 inset 0 0 20px rgba(255, 255, 0, 0.1);
+            position: relative;
+        }
+        
+        .debug-panel::before {
+            content: "SYNTAX ERROR DETECTED";
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            background: #1a1a00;
+            color: #ffff00;
+            padding: 0 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
         }
         
         .panel-header {
@@ -146,13 +162,19 @@
             border-bottom: 1px solid #444;
         }
         
-        .warning-icon {
-            width: 16px;
-            height: 16px;
+        .status-light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
             margin-right: 10px;
             background: #ffff00;
-            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-            animation: pulse 1s infinite;
+            box-shadow: 0 0 10px #ffff00;
+            animation: warning-pulse 1s infinite;
+        }
+        
+        @keyframes warning-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
         
         .panel-title {
@@ -163,39 +185,31 @@
         
         .panel-content {
             font-family: 'Fira Code', monospace;
-            font-size: 0.9rem;
-            line-height: 1.5;
+            font-size: 0.85rem;
+            line-height: 1.4;
         }
         
-        .debug-line {
-            margin: 8px 0;
-            display: flex;
-            align-items: flex-start;
+        .debug-log {
+            color: #ccc;
+            margin: 5px 0;
         }
         
-        .line-number {
-            color: #666;
-            margin-right: 15px;
-            min-width: 30px;
-        }
-        
-        .debug-text {
-            color: #ffcc99;
-        }
-        
-        .error-highlight {
-            background: rgba(255, 255, 0, 0.2);
+        .warning {
             color: #ffff00;
-            padding: 2px 4px;
-            border-radius: 3px;
         }
         
-        .method {
-            color: #ff9999;
+        .blocked {
+            color: #ff4444;
+            font-weight: bold;
         }
         
-        .url {
-            color: #99ccff;
+        .ip-address {
+            color: #66ccff;
+        }
+        
+        .timestamp {
+            color: #888;
+            font-size: 0.8rem;
         }
         
         @keyframes pulse {
@@ -233,6 +247,11 @@
             transform: translateY(-2px);
         }
         
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
         @media (max-width: 768px) {
             .debug-panel {
                 margin: 1rem;
@@ -242,53 +261,47 @@
     </style>
 </head>
 <body>
-    <div class="warning-pattern"></div>
+    <div class="scan-lines"></div>
     <div class="container">
         <div class="error-code">400</div>
+        <div class="divider"></div>
         <h1 class="error-title">BAD REQUEST</h1>
-        <p class="error-message">
-            The server cannot process the request due to malformed syntax.<br>
-            Check your request format and try again.
-        </p>
+        <div class="error-subtitle">Malformed Syntax Detected</div>
         
         <div class="debug-panel">
             <div class="panel-header">
-                <div class="warning-icon"></div>
-                <div class="panel-title">REQUEST ANALYSIS</div>
+                <div class="status-light"></div>
+                <div class="panel-title">PARSING ALERT</div>
             </div>
             <div class="panel-content">
-                <div class="debug-line">
-                    <span class="line-number">01</span>
-                    <span class="debug-text">Method: <span class="method error-highlight">INVALID</span></span>
+                <div class="debug-log">
+                    <span class="timestamp">[2024-01-15 14:23:07]</span>
+                    <span class="warning">REQUEST PARSING FAILED</span>
                 </div>
-                <div class="debug-line">
-                    <span class="line-number">02</span>
-                    <span class="debug-text">URL: <span class="url">/api/endpoint?malformed_query</span></span>
+                <div class="debug-log">
+                    <span class="timestamp">[2024-01-15 14:23:07]</span>
+                    Request Method: <span class="ip-address">INVALID</span>
                 </div>
-                <div class="debug-line">
-                    <span class="line-number">03</span>
-                    <span class="debug-text">Headers: <span class="error-highlight">Malformed Content-Type</span></span>
+                <div class="debug-log">
+                    <span class="timestamp">[2024-01-15 14:23:07]</span>
+                    Parser Status: <span class="blocked">SYNTAX ERROR</span>
                 </div>
-                <div class="debug-line">
-                    <span class="line-number">04</span>
-                    <span class="debug-text">Body: <span class="error-highlight">Invalid JSON syntax</span></span>
+                <div class="debug-log">
+                    <span class="timestamp">[2024-01-15 14:23:07]</span>
+                    Error Code: <span class="blocked">400</span>
                 </div>
-                <div class="debug-line">
-                    <span class="line-number">05</span>
-                    <span class="debug-text">Status: Request rejected by parser</span>
-                </div>
-                <div class="debug-line">
-                    <span class="line-number">06</span>
-                    <span class="debug-text">Recommendation: Verify request format</span>
+                <div class="debug-log">
+                    <span class="timestamp">[2024-01-15 14:23:08]</span>
+                    Recommendation: <span class="warning">Check request format</span>
                 </div>
             </div>
         </div>
         
-        <a href="/" class="back-button">Return to Base</a>
+        <a href="/" class="back-button">← Return Home</a>
     </div>
     
     <div class="footer">
-        WebServ/1.0 • Request Parser • Port 8080
+        WebServ/1.0 • C++ HTTP Server
     </div>
 </body>
 </html>

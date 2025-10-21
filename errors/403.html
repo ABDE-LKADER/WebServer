@@ -64,8 +64,17 @@
             text-shadow: 
                 0 0 20px #ff6b35,
                 0 0 40px #ff6b35;
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
             position: relative;
+        }
+        
+        .divider {
+            width: 80%;
+            max-width: 600px;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #ff6b35, transparent);
+            margin: 1.5rem auto;
+            opacity: 0.6;
         }
         
         .error-code::before {
@@ -91,23 +100,24 @@
         
         .error-title {
             font-size: clamp(1.5rem, 4vw, 3rem);
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.5rem;
             color: #ff6b35;
             text-transform: uppercase;
             letter-spacing: 0.2em;
-            position: relative;
+            animation: pulse 2s infinite;
         }
         
-        .error-title::after {
-            content: "";
-            position: absolute;
-            bottom: -5px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #ff6b35, transparent);
-            animation: pulse 2s infinite;
+        .error-subtitle {
+            font-size: clamp(0.9rem, 2vw, 1.2rem);
+            margin-bottom: 2rem;
+            color: #ff9966;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
         
         .error-message {
@@ -119,12 +129,12 @@
         }
         
         .security-panel {
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             border: 2px solid #ff6b35;
             border-radius: 10px;
             padding: 20px;
             margin: 2rem 0;
-            max-width: 600px;
+            max-width: 700px;
             text-align: left;
             box-shadow: 
                 0 0 20px rgba(255, 107, 53, 0.3),
@@ -149,7 +159,7 @@
             align-items: center;
             margin-bottom: 15px;
             padding-bottom: 10px;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid #444;
         }
         
         .status-light {
@@ -175,7 +185,7 @@
         
         .panel-content {
             font-family: 'Fira Code', monospace;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             line-height: 1.4;
         }
         
@@ -249,11 +259,9 @@
     <div class="scan-lines"></div>
     <div class="container">
         <div class="error-code">403</div>
+        <div class="divider"></div>
         <h1 class="error-title">ACCESS FORBIDDEN</h1>
-        <p class="error-message">
-            You don't have permission to access this resource on this server.<br>
-            Access denied by security policy. Contact administrator if access is required.
-        </p>
+        <div class="error-subtitle">Permission Denied</div>
         
         <div class="security-panel">
             <div class="panel-header">

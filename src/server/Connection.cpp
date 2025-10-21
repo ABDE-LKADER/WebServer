@@ -24,17 +24,26 @@ void	Connection::requestProssessing( void ) {
 	if ((len = recv(soc, buffer, BUF_SIZE, false)) == ERROR) return ;
 	request.recv.append(buffer, len);
 
-	if (getState() == REQUEST_LINE)
-		status = RequestParser::requestLineParser(request);
+	try {
 
-	if (getState() == READING_HEADERS)
-		status = request.startProssessing();
+		if (getState() == REQUEST_LINE) {
+			RequestParser::requestLineParser(request);
+			status = State(0, READING_HEADERS);
+		}
 
-	if (getState() == READING_HEADERS)
-		status = RequestParser::headersParser(request);
+		if (getState() == READING_HEADERS) {
+			RequestParser::headersParser(request);
 
-	if (getState() == READING_BODY)
-		status = request.streamBodies();
+			request.isValidHeaders();
+			request.startProssessing();
+
+			status = State(0, READING_BODY);
+		}
+		
+		if (getState() == READING_BODY) request.streamBodies();
+	}
+
+	catch( const State &state ) { status = state; }
 }
 
 void	Connection::reponseProssessing( void ) {

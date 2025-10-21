@@ -17,13 +17,12 @@
             background: linear-gradient(135deg, #001122 0%, #003344 50%, #004466 100%);
             font-family: 'Fira Code', 'Courier New', monospace;
             color: #00aaff;
-            min-height: 100vh;
-            overflow-x: hidden;
-            overflow-y: auto;
+            height: 100vh;
+            overflow: hidden;
             position: relative;
         }
         
-        .data-stream {
+        .error-lines {
             position: fixed;
             top: 0;
             left: 0;
@@ -31,30 +30,15 @@
             height: 100%;
             opacity: 0.1;
             z-index: 1;
-            background: 
-                repeating-linear-gradient(
-                    90deg,
-                    transparent 0px,
-                    rgba(0, 170, 255, 0.1) 1px,
-                    transparent 2px,
-                    transparent 20px
-                ),
-                repeating-linear-gradient(
-                    0deg,
-                    transparent 0px,
-                    rgba(0, 170, 255, 0.05) 1px,
-                    transparent 2px,
-                    transparent 10px
-                );
-            animation: data-flow 15s linear infinite;
-        }
-        
-        @keyframes data-flow {
-            0% { transform: translateX(0) translateY(0); }
-            100% { transform: translateX(20px) translateY(10px); }
-        }
-        
-        .container {
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent 0px,
+                transparent 2px,
+                #00aaff 2px,
+                #00aaff 4px
+            );
+        }        .container {
             position: relative;
             z-index: 2;
             display: flex;
@@ -75,8 +59,17 @@
                 0 0 20px #00aaff,
                 0 0 40px #0088cc,
                 0 0 80px #006699;
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
             animation: size-warning 2s ease-in-out infinite;
+        }
+        
+        .divider {
+            width: 80%;
+            max-width: 600px;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #00aaff, transparent);
+            margin: 1.5rem auto;
+            opacity: 0.6;
         }
         
         @keyframes size-warning {
@@ -98,41 +91,24 @@
         
         .error-title {
             font-size: clamp(1.5rem, 4vw, 3rem);
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.5rem;
             color: #66ccff;
             text-transform: uppercase;
             letter-spacing: 0.2em;
-            position: relative;
+            animation: pulse 2s infinite;
         }
         
-        .error-title::before,
-        .error-title::after {
-            content: "⬆";
-            position: absolute;
-            color: #00aaff;
-            font-size: 1.2em;
-            animation: size-indicator 2s ease-in-out infinite;
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
         
-        .error-title::before {
-            left: -2.5em;
-            animation-delay: 0s;
-        }
-        
-        .error-title::after {
-            right: -2.5em;
-            animation-delay: 1s;
-        }
-        
-        @keyframes size-indicator {
-            0%, 100% { 
-                transform: translateY(0) scale(1);
-                opacity: 1;
-            }
-            50% { 
-                transform: translateY(-10px) scale(1.2);
-                opacity: 0.7;
-            }
+        .error-subtitle {
+            font-size: clamp(0.9rem, 2vw, 1.2rem);
+            margin-bottom: 2rem;
+            color: #99ddff;
+            font-weight: 300;
+            letter-spacing: 0.1em;
         }
         
         .error-message {
@@ -143,141 +119,67 @@
             line-height: 1.6;
         }
         
-        .size-panel {
-            background: rgba(0, 0, 0, 0.8);
+                .terminal {
+            background: rgba(0, 0, 0, 0.9);
             border: 2px solid #00aaff;
             border-radius: 10px;
             padding: 20px;
             margin: 2rem 0;
-            max-width: 90vw;
-            width: 100%;
             max-width: 700px;
             text-align: left;
             box-shadow: 
                 0 0 20px rgba(0, 170, 255, 0.3),
                 inset 0 0 20px rgba(0, 170, 255, 0.1);
-            box-sizing: border-box;
         }
         
-        .panel-header {
+        .terminal-header {
             display: flex;
-            justify-content: between;
             align-items: center;
             margin-bottom: 15px;
             padding-bottom: 10px;
             border-bottom: 1px solid #444;
         }
         
-        .panel-title {
+        .terminal-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .close { background: #ff5555; }
+        .minimize { background: #ffff55; }
+        .maximize { background: #55ff55; }
+        
+        .terminal-title {
             color: #00aaff;
-            font-size: 1rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            flex: 1;
-        }
-        
-        .size-gauge {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .gauge-bar {
-            width: 100px;
-            height: 10px;
-            background: #333;
-            border-radius: 5px;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .gauge-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #00ff00 0%, #ffff00 70%, #ff0000 100%);
-            width: 95%;
-            animation: gauge-overflow 2s ease-in-out infinite;
-        }
-        
-        @keyframes gauge-overflow {
-            0%, 100% { width: 95%; }
-            50% { width: 100%; }
-        }
-        
-        .panel-content {
-            font-family: 'Fira Code', monospace;
             font-size: 0.9rem;
-            line-height: 1.5;
+            margin-left: 15px;
         }
         
-        .size-info {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin: 15px 0;
+        .terminal-content {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            line-height: 1.4;
         }
         
-        .info-item {
-            background: rgba(0, 170, 255, 0.1);
-            border-radius: 5px;
-            padding: 12px;
-            border-left: 3px solid #00aaff;
+        .prompt {
+            color: #00aaff;
         }
         
-        .info-label {
+        .size-text {
             color: #66ccff;
-            font-size: 0.8rem;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-        }
-        
-        .info-value {
-            color: #ffffff;
-            font-size: 1.1rem;
-            font-weight: bold;
         }
         
         .oversized {
             color: #ff6666;
+            font-weight: bold;
             animation: warning-flash 1.5s infinite;
         }
         
         @keyframes warning-flash {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.6; }
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 20px;
-            background: #333;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 15px 0;
-            position: relative;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #00aaff 0%, #ff6666 100%);
-            width: 0%;
-            animation: progress-exceed 3s ease-out infinite;
-            position: relative;
-        }
-        
-        @keyframes progress-exceed {
-            0% { width: 0%; }
-            70% { width: 100%; }
-            100% { width: 120%; }
-        }
-        
-        .progress-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 0.8rem;
-            font-weight: bold;
         }
         
         @keyframes pulse {
@@ -316,84 +218,34 @@
         }
         
         @media (max-width: 768px) {
-            .size-panel {
-                margin: 1rem 0;
+            .terminal {
+                margin: 1rem;
                 padding: 15px;
-                max-width: 95vw;
-            }
-            
-            .size-info {
-                grid-template-columns: 1fr;
-            }
-            
-            .container {
-                padding: 10px;
-            }
-            
-            .error-code {
-                font-size: clamp(3rem, 12vw, 8rem);
-            }
-            
-            .error-title {
-                font-size: clamp(1.2rem, 3vw, 2rem);
-            }
-            
-            .error-message {
-                font-size: clamp(0.9rem, 2vw, 1.2rem);
             }
         }
     </style>
 </head>
 <body>
-    <div class="data-stream"></div>
+    <div class="error-lines"></div>
     <div class="container">
         <div class="error-code">413</div>
-        <h1 class="error-title">PAYLOAD TOO LARGE</h1>
-        <p class="error-message">
-            The request payload exceeds the maximum allowed size.<br>
-            Reduce the size of your request and try again.
-        </p>
+        <div class="divider"></div>
+        <h1 class="error-title">Payload Too Large</h1>
+        <div class="error-subtitle">Request Exceeds Size Limit</div>
         
-        <div class="size-panel">
-            <div class="panel-header">
-                <div class="panel-title">Payload Size Analysis</div>
-                <div class="size-gauge">
-                    <span style="color: #66ccff; font-size: 0.8rem;">Limit:</span>
-                    <div class="gauge-bar">
-                        <div class="gauge-fill"></div>
-                    </div>
-                </div>
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="terminal-button close"></div>
+                <div class="terminal-button minimize"></div>
+                <div class="terminal-button maximize"></div>
+                <div class="terminal-title">SIZE MONITOR - webserv</div>
             </div>
-            <div class="panel-content">
-                <div class="progress-bar">
-                    <div class="progress-fill"></div>
-                    <div class="progress-text">Request Size: Exceeding Limits</div>
-                </div>
-                
-                <div class="size-info">
-                    <div class="info-item">
-                        <div class="info-label">Request Size</div>
-                        <div class="info-value oversized">2.5 MB</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Max Allowed</div>
-                        <div class="info-value">1.0 MB</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Content Type</div>
-                        <div class="info-value">multipart/form-data</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Status</div>
-                        <div class="info-value oversized">REJECTED</div>
-                    </div>
-                </div>
-                
-                <div style="margin-top: 20px; padding: 15px; background: rgba(255, 102, 102, 0.1); border-radius: 5px; border-left: 3px solid #ff6666;">
-                    <div style="color: #ff9999; font-size: 0.9rem;">
-                        <strong>Recommendation:</strong> Split large files into smaller chunks or compress the data before uploading.
-                    </div>
-                </div>
+            <div class="terminal-content">
+                <div><span class="prompt">[SIZE]</span> <span class="size-text">Request payload: </span><span class="oversized">2.5 MB</span></div>
+                <div><span class="prompt">[LIMIT]</span> <span class="size-text">Maximum allowed: 1.0 MB</span></div>
+                <div><span class="prompt">[TYPE]</span> <span class="size-text">Content-Type: multipart/form-data</span></div>
+                <div><span class="prompt">[STATUS]</span> <span class="oversized">REQUEST_REJECTED</span></div>
+                <div><span class="prompt">[ACTION]</span> <span class="size-text">Split or compress data before upload</span></div>
             </div>
         </div>
         
