@@ -234,12 +234,6 @@ for (int i = 0; env && env[i]; i++) {
     // Parse headers from CGI output
     parseHeaders(cgi_output, response);
 
-    // Parse headers from CGI output
-    // This parser should check for two things
-    // 1_ stat --> change state
-    // 2_ location if so change stats code accordingly
-    // 3_ content-length : this can be discarded since I calculate it when I want to set the body
-
     response.writeStringToBuffer(cgi_output);
 
     return response;
@@ -256,36 +250,40 @@ void CgiHandler::parseHeaders( std::string& cgi_output, Response& response) cons
         }
     }
 
-	std::stringstream	headersBlock;
+    std::stringstream	headersBlock;
 
-	headersBlock << cgi_output.substr(0, header_end);
-	cgi_output.erase(0, header_end + delimiter.size());
+    headersBlock << cgi_output.substr(0, header_end);
+    cgi_output.erase(0, header_end + delimiter.size());
+    std::string			line;
 
-	std::string			line;
-	while (std::getline(headersBlock, line)) {
-		if (line.empty()) continue ;
+    while (std::getline(headersBlock, line)) {
+        if (line.empty()) continue ;
 
-		std::string::size_type	colum = line.find(':');
+        std::string::size_type	colum = line.find(':');
 
-		std::string				name = line.substr(0, colum);
-		std::string				value = line.substr(colum + 1);
+        std::string header_name = line.substr(0, colum);
+        std::string header_value = line.substr(colum + 1);
 
-        if (name == "Status") {
-            int                 code;
-            std::stringstream   ss(value);
-
-            ss >> code;
-            response.setStatusCode(code);
+        if (header_name == "Status") {
+            // Parse status code from "Status: 200 OK" format
+            size_t space_pos = header_value.find(' ');
+            if (space_pos != std::string::npos) {
+                int status_code = std::atoi(header_value.substr(0, space_pos).c_str());
+                if (status_code > 0) {
+                    response.setStatusCode(status_code);
+                }
+            }
+        } else if (header_name == "Content-Type" || header_name == "Content-type") {
+            response.setContentType(header_value);
+        } else if (header_name == "Location") {
+            response.setLocation(header_value);
+            if (response.getStatusCode() == 0) {
+                response.setStatusCode(302);
+            }
+        } else {
+            response.setHeader(header_name, header_value);
         }
-
-
-        if (name == "Location") { ; }
-        response.setHeader(name, value);
-	}
-
-    // CHECK
-
-    // ...
+    }
 }
 
 
