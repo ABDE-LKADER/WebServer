@@ -277,28 +277,11 @@ void CgiHandler::parseHeaders( std::string& cgi_output, Response& response) cons
             response.setContentType(header_value);
         } else if (header_name == "Location") {
             response.setLocation(header_value);
-            if (response.getStatusCode() == 0) {
                 response.setStatusCode(302);
-            }
         } else {
             response.setHeader(header_name, header_value);
         }
     }
-}
-
-
-std::string CgiHandler::extractBody(const std::string& cgi_output) const {
-    size_t body_start = cgi_output.find("\r\n\r\n");
-    if (body_start != std::string::npos) {
-        return cgi_output.substr(body_start + 4);
-    }
-
-    body_start = cgi_output.find("\n\n");
-    if (body_start != std::string::npos) {
-        return cgi_output.substr(body_start + 2);
-    }
-    
-    return cgi_output;
 }
 
 bool CgiHandler::waitForCgiWithTimeout(pid_t pid, int* status) const {
@@ -341,11 +324,13 @@ char** CgiHandler::buildEnvVariables () const {
     env_strings.push_back("SERVER_NAME=" + listen.first);
     env_strings.push_back("SERVER_PORT=" + listen.second);
 
-    // If method is POST get set CONTENT_LENGTH
-    // check if request.has_content_length
-    // set --> CONTENT_LENGTH= + request.content_length
+    if (request.method == "POST") {
+        std::stringstream ss;
+        ss << request.content_length;
+        env_strings.push_back("CONTENT_LENGTH=" + ss.str());
+    }
 
-    // Content-Type from headers
+    // Content-type from headers
     map_t::const_iterator content_type = request.headers.find("content-type");
     if (content_type != request.headers.end()) {
         env_strings.push_back("CONTENT_TYPE=" + content_type->second);
@@ -353,6 +338,22 @@ char** CgiHandler::buildEnvVariables () const {
 
     // HTTP headers - these need to be convert to HTTP_* format
     // 4.1.18.  Protocol-Specific Meta-Variables (RFC 3785)
+    for (map_t::const_iterator it = request.headers.begin(); 
+    it != request.headers.end(); ++it) {
+        std::string header_name = it->first;
+
+        // Convert to uppercase and replace - with _
+        for (size_t i = 0; i < header_name.length(); ++i) {
+            header_name[i] = std::toupper(static_cast<unsigned char>(header_name[i]));
+            if (header_name[i] == '-') {
+                header_name[i] = '_';
+            }
+        }
+
+        env_strings.push_back("HTTP_" + header_name + "=" + it->second);
+    }
+
+    // 10.12.6.7
 
     char** env = new char*[env_strings.size() + 1];
     for (size_t i = 0; i < env_strings.size(); ++i) {
