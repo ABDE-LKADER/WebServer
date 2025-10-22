@@ -228,9 +228,12 @@ for (int i = 0; env && env[i]; i++) {
         return response;
     }
 
-    // set to success
+    // Set default status if not set by CGI
     response.setStatusCode(200);
-    
+
+    // Parse headers from CGI output
+    parseHeaders(cgi_output, response);
+
     // Parse headers from CGI output
     // This parser should check for two things
     // 1_ stat --> change state
@@ -244,6 +247,19 @@ for (int i = 0; env && env[i]; i++) {
 
     return response;
 }
+
+void CgiHandler::parseHeaders(const std::string& cgi_output, Response& response) const {
+    size_t header_end = cgi_output.find("\r\n\r\n");
+    if (header_end == std::string::npos) {
+        header_end = cgi_output.find("\n\n");
+        if (header_end == std::string::npos) {
+            return;
+        }
+    }
+
+    // ...
+}
+
 
 std::string CgiHandler::extractBody(const std::string& cgi_output) const {
     size_t body_start = cgi_output.find("\r\n\r\n");
