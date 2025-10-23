@@ -1,10 +1,10 @@
 # include "Connection.hpp"
 
 Connection::Connection( void ) : soc(-1), status(0, REQUEST_LINE),
-		last_active(Core::now_ms()) { }
+		last_active(Core::nowTime()) { }
 
 Connection::Connection( int conn_sock, ServerConfig &server ) : soc(conn_sock),
-		status(0, REQUEST_LINE), request(server), last_active(Core::now_ms()) { }
+		status(0, REQUEST_LINE), request(server), last_active(Core::nowTime()) { }
 
 Connection::~Connection( void ) { }
 
@@ -18,7 +18,7 @@ void	Connection::setCode( int code ) { status.code = code; }
 
 void	Connection::setState( state_e state ) { status.state = state; }
 
-void	Connection::touch( void) { last_active = Core::now_ms(); }
+void	Connection::touch( void) { last_active = Core::nowTime(); }
 
 time_t	Connection::getLastActive( void ) { return last_active; }
 
@@ -33,7 +33,8 @@ void	Connection::requestProssessing( void ) {
 
 		if (getState() == REQUEST_LINE) {
 			RequestParser::requestLineParser(request);
-			status = State(0, READING_HEADERS); touch();
+			status = State(0, READING_HEADERS);
+			touch();
 		}
 
 		if (getState() == READING_HEADERS) {
@@ -42,11 +43,13 @@ void	Connection::requestProssessing( void ) {
 			request.isValidHeaders();
 			request.startProssessing();
 
-			status = State(0, READING_BODY); touch();
+			status = State(0, READING_BODY);
+			touch();
 		}
 
 		if (getState() == READING_BODY) {
-			request.streamBodies(); touch();
+			request.streamBodies();
+			touch();
 		}
 
 	}
@@ -56,17 +59,20 @@ void	Connection::requestProssessing( void ) {
 void	Connection::reponseProssessing( void ) {
 	ResponseBuilder		builder(request.server);
 
-	std::cout << std::setw(40) << std::left
-		<< GR "Code: [ " << getCode() << " ]" RS << std::endl;
+	std::cout << GR "Request Exit Code: [ " << getCode() << " ]" RS << std::endl;
 
-	if (getState() != BAD)
-		response = builder.buildResponse(request);
+	if (getState() != BAD) {
+		builder.buildResponse(request);
+		touch();
+	}
 
-	if (getState() == BAD)
+	if (getState() == BAD) {
 		response.generateErrorPage(request.server, getCode());
+		touch();
+	}
 
 	send(soc, response.toString().c_str(),
 		response.toString().length(), MSG_NOSIGNAL);
 
-	touch(); setState(CLOSING);
+	setState(CLOSING); touch();
 }

@@ -52,6 +52,16 @@ std::string	Request::longestPrefixMatch( void ) {
 	return longest;
 }
 
+std::string	Request::generateUniqueName( void ) {
+	std::time_t			wallTime = std::time(NULL);
+	std::clock_t		cpuTicks = std::clock();
+	
+	std::ostringstream	orand;
+	orand << "upload_" << wallTime << "_" << cpuTicks << content_type;
+
+	return orand.str();
+}
+
 void	Request::isValidHeaders( void ) {
 	if (headers.find("transfer-encoding") != headers.end())
 		throw State(400, BAD);
@@ -59,11 +69,9 @@ void	Request::isValidHeaders( void ) {
 	if (method != "POST") return ;
 
 	map_t::iterator		headerIter = headers.find("content-length");
+	if (headerIter == headers.end()) throw State(411, BAD);
 
-	if (headerIter == headers.end()) throw State(400, BAD);
-
-	std::string		value = headerIter->second;
-
+	std::string			&value = headerIter->second;
 	if (value.empty()) throw State(400, BAD);
 
 	if (value.find_first_not_of("0123456789") != std::string::npos)
@@ -76,12 +84,11 @@ void	Request::isValidHeaders( void ) {
 
 	size_t	max_size = server.getMaxClientBodySize();
 	if (content_length > max_size) throw State(413, BAD);
-	has_conlen = true;
 
 	headerIter = headers.find("content-type");
-	if (headerIter != headers.end()) {
-		;
-	}
+	if (headerIter == headers.end()) throw State(400, BAD);
+
+	content_type = headerIter->second;
 }
 
 void	Request::startProssessing( void ) {
@@ -114,7 +121,7 @@ void	Request::startProssessing( void ) {
 
 void	Request::streamBodies( void ) {
 	if (content_length > 0 && recv.empty()) throw State(0, READING_BODY);
-	if (has_conlen == false) throw State(400, BAD);
+	std::cout << "Streaming ..." << std::endl;
 
 	size_t			to_write;
 	if ((to_write = std::min(recv.size(), content_length)) > 0) {

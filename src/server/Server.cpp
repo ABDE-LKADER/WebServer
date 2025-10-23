@@ -28,6 +28,12 @@ bool	Server::onWriting( int sock ) {
 				|| state == CLOSING || state == BAD;
 }
 
+void	Server::close_connection( int sock ) {
+	epoll_ctl(epoll_fd, EPOLL_CTL_DEL, sock, NULL);
+	connections.erase(sock);
+	close(sock);
+}
+
 void	Server::socket_control( int fd, int mode, int op ) {
 	event_t		ev;
 
@@ -36,13 +42,7 @@ void	Server::socket_control( int fd, int mode, int op ) {
 
 	if (epoll_ctl(epoll_fd, op, ev.data.fd, &ev) == ERROR)
 		throw std::runtime_error("<epoll_ctl> " + std::string(strerror(errno)));
-}
-
-void	Server::close_connection( int sock ) {
-	epoll_ctl(epoll_fd, EPOLL_CTL_DEL, sock, NULL);
-	connections.erase(sock);
-	close(sock);
-}
+}		
 
 void	Server::accept_connection( int sock ) {
 	int		conn_sock = accept(sock, NULL, NULL);
@@ -55,13 +55,13 @@ void	Server::accept_connection( int sock ) {
 }
 
 void	Server::check_timeouts( void ) {
-	time_t		now = Core::now_ms();
-
+	time_t		now = Core::nowTime();
+	
 	for (std::map<int, Connection>::iterator loop = connections.begin();
-		loop != connections.end(); ++loop) {
-
+	loop != connections.end(); ++loop) {
+		
 		Connection &conn = loop->second;
-		if (now - conn.getLastActive() > TIMEOUT) {
+		if (now - conn.getLastActive() >= TIMEOUT) {
 			conn.setCode(408); conn.setState(BAD);
 			socket_control(conn.getSoc(), EPOLLOUT, EPOLL_CTL_MOD);
 		}

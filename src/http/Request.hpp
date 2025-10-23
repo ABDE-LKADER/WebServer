@@ -28,15 +28,18 @@ class Request
 		map_t					headers;
 		Location				location;
 
-		bool					has_conlen;
 		size_t					content_length;
+		std::string				content_type;
+
 		post_e					post_dest;
+		std::string				post_file;
 
 		void					streamBodies( void );
 		void					isValidHeaders( void );
 		bool					isMethodAllowed( void );
 		void					startProssessing( void );
 		std::string				longestPrefixMatch( void );
+		std::string				generateUniqueName( void );
 };
 
 #endif
