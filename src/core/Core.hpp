@@ -37,7 +37,7 @@
 
 // ------------------------- Webserv Typedefs -------------------------//
 
-typedef std::map<std::string, std::string>					map_t;
+typedef std::map<std::string, std::string>					map_s;
 typedef struct addrinfo										addrinfo_t;
 typedef std::vector< std::pair<std::string, std::string> >	vector_pairs;
 

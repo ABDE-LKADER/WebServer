@@ -3,6 +3,7 @@
 
 # include "Core.hpp"
 # include "Location.hpp"
+# include "MimeResolver.hpp"
 # include "ServerConfig.hpp"
 # include "StaticFileHandler.hpp"
 
@@ -25,7 +26,7 @@ class Request
 		std::string				version;
 
 		ServerConfig			server;
-		map_t					headers;
+		map_s					headers;
 		Location				location;
 
 		size_t					content_length;
@@ -33,6 +34,8 @@ class Request
 
 		post_e					post_dest;
 		std::string				post_file;
+
+		MimeResolver			extMime;
 
 		void					streamBodies( void );
 		void					isValidHeaders( void );

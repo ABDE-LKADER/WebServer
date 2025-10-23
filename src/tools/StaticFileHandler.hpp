@@ -5,7 +5,6 @@
 
 class StaticFileHandler {
 private:
-    std::string                 getMimeType(const std::string& path) const;
     bool                        isPathSafe(const std::string& path) const;
 
 public:

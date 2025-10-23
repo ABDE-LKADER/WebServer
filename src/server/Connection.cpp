@@ -53,26 +53,36 @@ void	Connection::requestProssessing( void ) {
 		}
 
 	}
-	catch( const State &state ) { status = state; }
+	catch( const State &state ) { status = state; touch(); }
 }
 
 void	Connection::reponseProssessing( void ) {
-	ResponseBuilder		builder(request.server);
-
+	std::string			buffer;
+	
 	std::cout << GR "Request Exit Code: [ " << getCode() << " ]" RS << std::endl;
-
+	
 	if (getState() != BAD) {
+		ResponseBuilder		builder(request.server);
+
 		builder.buildResponse(request, response);
+		if (getState() == READY_TO_WRITE) {
+			buffer = response.generateHead();
+			setState(WRITING);
+		}
+	
+		else if (getState() == WRITING) {
+			buffer = response.getBody();
+			setState(CLOSING);
+		}
 		touch();
 	}
 
-	if (getState() == BAD) {
+	else if (getState() == BAD) {
 		response.generateErrorPage(request.server, getCode());
+		setState(CLOSING);
 		touch();
 	}
 
-	send(soc, response.toString().c_str(),
-		response.toString().length(), MSG_NOSIGNAL);
-
-	setState(CLOSING); touch();
+	send(soc, buffer.c_str(), buffer.length(), MSG_NOSIGNAL);
+	touch();
 }

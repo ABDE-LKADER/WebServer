@@ -327,14 +327,14 @@ char** CgiHandler::buildEnvVariables () const {
     }
 
     // Content-type from headers
-    map_t::const_iterator content_type = request.headers.find("content-type");
+    map_s::const_iterator content_type = request.headers.find("content-type");
     if (content_type != request.headers.end()) {
         env_strings.push_back("CONTENT_TYPE=" + content_type->second);
     }
 
     // HTTP headers - these need to be convert to HTTP_* format
     // 4.1.18.  Protocol-Specific Meta-Variables (RFC 3785)
-    for (map_t::const_iterator it = request.headers.begin(); 
+    for (map_s::const_iterator it = request.headers.begin(); 
     it != request.headers.end(); ++it) {
         std::string header_name = it->first;
 

@@ -15,11 +15,13 @@ private:
     //NOTE: This string is here for testing purposes in practise I'll write directly 
     // to the buffer
     std::string                         body;
+    size_t                              total_size;
 
 public:
     Response();
     ~Response();
 
+    void setTotalSize(size_t code);
     void setStatusCode(int code);
     void setStatusMessage(const std::string& message);
     void setContentType(const std::string& type);
@@ -29,16 +31,18 @@ public:
     // Getters
     int                     getStatusCode() const;
     const std::string&      getStatusMessage() const;
+    size_t                  getTotalSize() const;
 
     // Build the HTTP response string
-    std::string toString() const;
+    std::string getBody() const;
 
-    void        generateErrorPage(const ServerConfig &server, int code);
-    static      std::string getStatusText(int code);
-    void        setContentLength(size_t length);
-    void        writeFileToBuffer(std::string full_path);
+    std::string     generateHead() const;
+    void            generateErrorPage(const ServerConfig &server, int code);
+    static          std::string getStatusText(int code);
+    void            setContentLength(size_t length);
+    void            writeFileToBuffer(std::string full_path);
     // This now also sets the "Content-Lenght"
-    void        writeStringToBuffer(std::string str);
+    void            writeStringToBuffer(std::string str);
 };
 
 #endif

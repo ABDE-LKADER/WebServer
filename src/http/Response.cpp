@@ -32,6 +32,14 @@ void Response::setLocation(const std::string& url) {
     setHeader("Location", url);
 }
 
+void Response::setTotalSize(size_t size) {
+    total_size = size;
+}
+
+size_t Response::getTotalSize() const {
+    return total_size;
+}
+
 void Response::generateErrorPage(const ServerConfig &server, int code) {
     ErrorHandler    error_handler(server);
 
@@ -40,7 +48,7 @@ void Response::generateErrorPage(const ServerConfig &server, int code) {
     writeStringToBuffer(error_handler.generateErrorResponse(code));
 }
 
-std::string Response::toString() const {
+std::string Response::generateHead() const {
     std::stringstream ss;
     
     // Status line
@@ -54,10 +62,11 @@ std::string Response::toString() const {
 
     // Empty line between headers and body
     ss << "\r\n";
-    // Body
-    ss << body;
-
     return ss.str();
+}
+
+std::string Response::getBody() const {
+    return body;
 }
 
 int Response::getStatusCode() const {

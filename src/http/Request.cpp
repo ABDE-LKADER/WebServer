@@ -68,7 +68,7 @@ void	Request::isValidHeaders( void ) {
 
 	if (method != "POST") return ;
 
-	map_t::iterator		headerIter = headers.find("content-length");
+	map_s::iterator		headerIter = headers.find("content-length");
 	if (headerIter == headers.end()) throw State(411, BAD);
 
 	std::string			&value = headerIter->second;

@@ -1,102 +1,11 @@
-#include <algorithm>
-#include <dirent.h>
-#include <cstdio>
-#include "StaticFileHandler.hpp"
+# include "Core.hpp"
+# include "MimeResolver.hpp"
+# include "StaticFileHandler.hpp"
 
 StaticFileHandler::StaticFileHandler() {
 }
 
 StaticFileHandler::~StaticFileHandler() {
-}
-
-std::string StaticFileHandler::getMimeType(const std::string& path) const {
-    size_t dot_pos = path.find_last_of('.');
-    if (dot_pos == std::string::npos) {
-        return "application/octet-stream";
-    }
-
-    std::string extension = path.substr(dot_pos + 1);
-
-    // Convert to lowercase
-    for (std::string::iterator it = extension.begin(); it != extension.end(); ++it) {
-        *it = std::tolower(static_cast<unsigned char>(*it));
-    }
-
-    if (extension == "txt" || extension == "cpp" || extension == "hpp"
-            || extension == "h")  return "text/plain";
-    if (extension == "md")   return "text/markdown";
-    if (extension == "html" || extension == "htm") return "text/html";
-    if (extension == "css")  return "text/css";
-    if (extension == "xml")  return "text/xml";
-    if (extension == "csv")  return "text/csv";
-    if (extension == "js" || extension == "mjs") return "application/javascript";
-    if (extension == "json") return "application/json";
-    if (extension == "jsonld") return "application/ld+json";
-
-    if (extension == "png")  return "image/png";
-    if (extension == "jpg" || extension == "jpeg") return "image/jpeg";
-    if (extension == "gif")  return "image/gif";
-    if (extension == "bmp")  return "image/bmp";
-    if (extension == "ico")  return "image/x-icon";
-    if (extension == "svg" || extension == "svgz") return "image/svg+xml";
-    if (extension == "webp") return "image/webp";
-    if (extension == "tif" || extension == "tiff") return "image/tiff";
-    if (extension == "avif") return "image/avif";
-
-    if (extension == "mp3")  return "audio/mpeg";
-    if (extension == "wav")  return "audio/wav";
-    if (extension == "ogg")  return "audio/ogg";
-    if (extension == "m4a")  return "audio/mp4";
-    if (extension == "weba") return "audio/webm";
-
-    if (extension == "mp4")  return "video/mp4";
-    if (extension == "m4v")  return "video/mp4";
-    if (extension == "mov")  return "video/quicktime";
-    if (extension == "avi")  return "video/x-msvideo";
-    if (extension == "wmv")  return "video/x-ms-wmv";
-    if (extension == "ogv")  return "video/ogg";
-    if (extension == "webm") return "video/webm";
-    if (extension == "3gp")  return "video/3gpp";
-    if (extension == "3g2")  return "video/3gpp2";
-    if (extension == "mkv")  return "video/x-matroska";
-
-    if (extension == "pdf")  return "application/pdf";
-    if (extension == "ps")   return "application/postscript";
-    if (extension == "eps")  return "application/postscript";
-    if (extension == "ai")   return "application/postscript";
-    if (extension == "rtf")  return "application/rtf";
-    if (extension == "doc")  return "application/msword";
-    if (extension == "docx") return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-    if (extension == "xls")  return "application/vnd.ms-excel";
-    if (extension == "xlsx") return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-    if (extension == "ppt")  return "application/vnd.ms-powerpoint";
-    if (extension == "pptx") return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
-
-    if (extension == "zip")  return "application/zip";
-    if (extension == "gz")   return "application/gzip";
-    if (extension == "tar")  return "application/x-tar";
-    if (extension == "bz2")  return "application/x-bzip2";
-    if (extension == "xz")   return "application/x-xz";
-    if (extension == "7z")   return "application/x-7z-compressed";
-    if (extension == "rar")  return "application/vnd.rar";
-
-    if (extension == "wasm") return "application/wasm";
-    if (extension == "sh")   return "application/x-sh";
-    if (extension == "csh")  return "application/x-csh";
-    if (extension == "php")  return "application/x-httpd-php";
-    if (extension == "swf")  return "application/x-shockwave-flash";
-
-    if (extension == "otf")  return "font/otf";
-    if (extension == "ttf")  return "font/ttf";
-    if (extension == "woff") return "font/woff";
-    if (extension == "woff2") return "font/woff2";
-
-    if (extension == "mpkg") return "application/vnd.apple.installer+xml";
-    if (extension == "deb")  return "application/vnd.debian.binary-package";
-    if (extension == "iso")  return "application/x-iso9660-image";
-    if (extension == "dmg")  return "application/x-apple-diskimage";
-
-    return "application/octet-stream";
 }
 
 bool StaticFileHandler::fileExists(const std::string& path) const {
@@ -167,7 +76,14 @@ std::vector<std::string>    StaticFileHandler::listDirectory(const std::string& 
 }
 
 std::string StaticFileHandler::getContentType(const std::string& path) const {
-    return getMimeType(path);
+    MimeResolver resolver;
+    size_t dot_pos = path.find_last_of('.');
+
+    if (dot_pos == std::string::npos)
+        return resolver.getMimeType("bin");
+
+    std::string extension = path.substr(dot_pos + 1);
+    return resolver.getMimeType(extension);
 }
 
 bool StaticFileHandler::isPathSafe(const std::string& path) const {
