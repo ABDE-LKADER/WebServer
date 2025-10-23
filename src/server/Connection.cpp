@@ -62,7 +62,7 @@ void	Connection::reponseProssessing( void ) {
 	std::cout << GR "Request Exit Code: [ " << getCode() << " ]" RS << std::endl;
 
 	if (getState() != BAD) {
-		builder.buildResponse(request);
+		builder.buildResponse(request, response);
 		touch();
 	}
 
