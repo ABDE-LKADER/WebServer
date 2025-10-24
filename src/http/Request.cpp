@@ -1,9 +1,9 @@
 # include "Request.hpp"
 
-Request::Request( void ) : content_length(0), post_dest(POST_NONE) { }
+Request::Request( void ) : content_length(0), detectPost(NONE) { }
 
 Request::Request( ServerConfig &serv ) : server(serv), content_length(0),
-		post_dest(POST_NONE) { }
+		detectPost(NONE) { }
 
 Request::~Request( void ) { }
 
@@ -55,9 +55,10 @@ std::string	Request::longestPrefixMatch( void ) {
 std::string	Request::generateUniqueName( void ) {
 	std::time_t			wallTime = std::time(NULL);
 	std::clock_t		cpuTicks = std::clock();
-	
+
 	std::ostringstream	orand;
-	orand << "upload_" << wallTime << "_" << cpuTicks << content_type;
+	orand << "upload_" << wallTime << "_" << cpuTicks
+		<< extMime.getExtension(content_type);
 
 	return orand.str();
 }
@@ -91,6 +92,17 @@ void	Request::isValidHeaders( void ) {
 	content_type = headerIter->second;
 }
 
+bool	Request::isCgiRequest( void ) const {
+	size_t							dot_pos;
+	std::string						extension;
+
+	if ((dot_pos = target.find_last_of(".")) == std::string::npos)
+		return false;
+
+	extension = target.substr(dot_pos);
+	return location.getCgi().find(extension) != location.getCgi().end();
+}
+
 void	Request::startProssessing( void ) {
 	const map_location				&locations = server.getLocations();
 	std::string						longestM = longestPrefixMatch();
@@ -101,31 +113,48 @@ void	Request::startProssessing( void ) {
 
 	if (!isMethodAllowed()) throw State(405, BAD);
 
-	if (method == "POST") {
-		/* Decide CGI vs UPLOAD */
-		if (location.getUpload() == false) throw State(403, BAD);
-		path = joinPath(location.getUploadLocation(), target);
-	}
-
-	else {
+	if (method != "POST") {
 		path = target.substr(longestM.size());
 		path = joinPath(location.getRoot(), path);
+		throw State(0, READY_TO_WRITE);
+	}
+
+	if (method == "POST") {
+		if (isCgiRequest()) {
+			cgiPath = joinPath(location.getUploadLocation(), generateUniqueName());
+			detectPost = CGI;
+		}
+		else if (location.getUpload() == true) {
+			detectPost = UPLOAD;
+			path = joinPath(location.getUploadLocation(), target);
+
+			if (fileHandler.isDirectory(path))
+				path = joinPath(path, generateUniqueName());
+
+			if (fileHandler.fileExists(path)) fileHandler.deleteFile(path);
+		}
+		else throw State(403, BAD);
 	}
 
 	std::cout << "[ " << longestM << " ]"
 			  << "[ " << content_length << " ]"
 				 "[ " << path << " ]" << std::endl;
 
-	if (method != "POST") throw State(0, READY_TO_WRITE);
 }
 
 void	Request::streamBodies( void ) {
 	if (content_length > 0 && recv.empty()) throw State(0, READING_BODY);
 	std::cout << "Streaming ..." << std::endl;
 
+	std::string		filePath;
 	size_t			to_write;
+
+	if (detectPost == CGI) filePath = cgiPath;
+	else if (detectPost == UPLOAD) filePath = path;
+	else throw State(500, BAD); 
+
 	if ((to_write = std::min(recv.size(), content_length)) > 0) {
-		std::ofstream	outfile(path.c_str(), std::ios::binary | std::ios::app);
+		std::ofstream	outfile(filePath.c_str(), std::ios::binary | std::ios::app);
 		if (!outfile.is_open()) throw State(500, BAD);
 
 		outfile.write(recv.data(), to_write);

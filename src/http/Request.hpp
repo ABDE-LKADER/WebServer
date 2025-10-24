@@ -32,16 +32,19 @@ class Request
 		size_t					content_length;
 		std::string				content_type;
 
-		post_e					post_dest;
-		std::string				post_file;
+		std::string				cgiPath;
+		post_e					detectPost;
 
 		MimeResolver			extMime;
+		StaticFileHandler		fileHandler;
 
-		void					streamBodies( void );
 		void					isValidHeaders( void );
 		bool					isMethodAllowed( void );
 		void					startProssessing( void );
 		std::string				longestPrefixMatch( void );
+
+		bool					isCgiRequest( void ) const;
+		void					streamBodies( void );
 		std::string				generateUniqueName( void );
 };
 

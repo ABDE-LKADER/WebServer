@@ -62,9 +62,9 @@ typedef std::vector< std::pair<std::string, std::string> >	vector_pairs;
 // ------------------------- Webserv Enum -------------------------//
 
 enum post_e {
-	POST_NONE,
-	POST_UPLOAD,
-	POST_CGI
+	NONE,
+	UPLOAD,
+	CGI
 };
 
 enum state_e {
