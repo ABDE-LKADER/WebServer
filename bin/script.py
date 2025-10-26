@@ -5,7 +5,7 @@ import sys
 
 print("Content-Type: text/html\r\n\r\n")
 print("<html><head><title>CGI Test</title></head><body>")
-print("<h1>Hello from CGI!</h1>")
+print("<h1>Hello from python CGI!</h1>")
 print("<p>This is a simple Python CGI script.</p>")
 
 print("<h2>Environment Variables:</h2><ul>")
