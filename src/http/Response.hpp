@@ -14,7 +14,6 @@ private:
 
     //NOTE: This string is here for testing purposes in practise I'll write directly 
     // to the buffer
-    std::string                         body;
     size_t                              total_size;
 
 public:
@@ -22,7 +21,7 @@ public:
     ~Response();
 
     void setTotalSize(size_t code);
-    void setStatusCode(int code);
+    void setResponseLine(int code);
     void setStatusMessage(const std::string& message);
     void setContentType(const std::string& type);
     void setHeader(const std::string& name, const std::string& value);
@@ -33,10 +32,10 @@ public:
     const std::string&      getStatusMessage() const;
     size_t                  getTotalSize() const;
 
-    // Build the HTTP response string
+    std::stringstream       generated;
     std::string getBody() const;
 
-    std::string     generateHead() const;
+    // std::string     generateHead() const;
     void            generateErrorPage(const ServerConfig &server, int code);
     static          std::string getStatusText(int code);
     void            setContentLength(size_t length);

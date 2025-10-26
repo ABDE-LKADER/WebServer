@@ -6,11 +6,11 @@ Response::Response() : http_version("HTTP/1.0") { }
 Response::~Response() {
 }
 
-void Response::setStatusCode(int code) {
+void Response::setResponseLine(int code) {
     status_code = code;
     status_message = getStatusText(code);
+    generated << http_version << status_code << " " << status_message << "\r\n";
 }
-
 
 void Response::setStatusMessage(const std::string& message) {
     status_message = message;
@@ -21,7 +21,7 @@ const std::string&      Response::getStatusMessage() const {
 }
 
 void Response::setContentType(const std::string& type) {
-    setHeader("Content-Type", type);
+    generated << "Content-Type: " << type << "\r\n";
 }
 
 void Response::setHeader(const std::string& name, const std::string& value) {
@@ -43,30 +43,30 @@ size_t Response::getTotalSize() const {
 void Response::generateErrorPage(const ServerConfig &server, int code) {
     ErrorHandler    error_handler(server);
 
-    setStatusCode(code);
+    setResponseLine(code);
     setContentType("text/html");
     writeStringToBuffer(error_handler.generateErrorResponse(code));
 }
 
-std::string Response::generateHead() const {
-    std::stringstream ss;
+// std::string Response::generateHead() const {
+//     std::stringstream ss;
     
-    // Status line
-    ss << http_version << " " << status_code << " " << status_message << "\r\n";
+//     // Status line
+//     ss << http_version << " " << status_code << " " << status_message << "\r\n";
     
-    // Headers
-    for (std::map<std::string, std::string>::const_iterator it = headers.begin();
-         it != headers.end(); ++it) {
-        ss << it->first << ": " << it->second << "\r\n";
-    }
+//     // Headers
+//     for (std::map<std::string, std::string>::const_iterator it = headers.begin();
+//          it != headers.end(); ++it) {
+//         ss << it->first << ": " << it->second << "\r\n";
+//     }
 
-    // Empty line between headers and body
-    ss << "\r\n";
-    return ss.str();
-}
+//     // Empty line between headers and body
+//     ss << "\r\n";
+//     return ss.str();
+// }
 
 std::string Response::getBody() const {
-    return body;
+    return generated;
 }
 
 int Response::getStatusCode() const {
@@ -107,21 +107,19 @@ std::string Response::getStatusText(int code) {
 }
 
 void Response::setContentLength(size_t length) {
-    std::stringstream ss;
-    ss << length;
-    setHeader("Content-Length", ss.str());
+    generated << "Content-Length: " << length << "\r\n";
 }
 
 void Response::writeStringToBuffer(std::string str) {
-    body = str;
-    setContentLength(body.length());
+    setContentLength(str.length());
+    generated << "\r\n";
+    generated << str;
 }
 
 void Response::writeFileToBuffer(std::string full_path) {
     struct stat s_buffer;
     if (stat(full_path.c_str(), &s_buffer) != 0) {
         setContentLength(0);
-        body = "";
         return;
     }
 
@@ -131,13 +129,15 @@ void Response::writeFileToBuffer(std::string full_path) {
     std::ifstream file(full_path.c_str());
     if (!file.is_open()) {
         setContentLength(0);
-        body = "";
         return;
     }
 
-    // Reserve space in the string to avoid reallocations
-    body.resize(s_buffer.st_size);
+    char    buffer[BUF_SIZE];
 
-    file.read(&body[0], s_buffer.st_size);
+    // Reserve space in the string to avoid reallocations
+    generated.resize(s_buffer.st_size);
+
+    file.read(buffer, s_buffer.st_size);
+    generated << buffer;
     file.close();
 }

@@ -171,7 +171,7 @@ for (int i = 0; env && env[i]; i++) {
         }
         
         // Set default status if not set by CGI
-        response.setStatusCode(200);
+        response.setResponseLine(200);
         
         // Parse headers from CGI output
         parseHeaders(cgi_output, response);
@@ -211,14 +211,14 @@ void CgiHandler::parseHeaders( std::string& cgi_output, Response& response) cons
             if (space_pos != std::string::npos) {
                 int status_code = std::atoi(header_value.substr(0, space_pos).c_str());
                 if (status_code > 0) {
-                    response.setStatusCode(status_code);
+                    response.setResponseLine(status_code);
                 }
             }
         } else if (header_name == "Content-Type" || header_name == "Content-type") {
             response.setContentType(header_value);
         } else if (header_name == "Location") {
             response.setLocation(header_value);
-                response.setStatusCode(302);
+                response.setResponseLine(302);
         } else {
             response.setHeader(header_name, header_value);
         }

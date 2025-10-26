@@ -57,34 +57,34 @@ void	Connection::requestProssessing( void ) {
 }
 
 void	Connection::reponseProssessing( void ) {
-	std::string			buffer;
 	std::cout << GR "Request Exit Code: [ " << getCode() << " ]" RS << std::endl;
 
-	if (getState() != BAD) {
-		ResponseBuilder		builder(request.server);
+	try {
 
-		builder.buildResponse(request, response);
-		if (getState() == READY_TO_WRITE) {
-			buffer = response.generateHead();
-			if (request.location.getReturn().first) setState(CLOSING);
-			else setState(WRITING);
+		if (getState() != BAD) {
+			if (getState() == READY_TO_WRITE) {
+				ResponseBuilder		builder(request.server);
+				builder.buildResponse(request, response);
+			}
+			touch();
 		}
-
-		else if (getState() == WRITING) {
-			buffer = response.getBody();
-			setState(CLOSING);
-		}
-		touch();
 	}
 
-	else if (getState() == BAD) {
+	catch( const State &state ) { status = state; touch(); }
+
+	if (getState() == WRITING) {
+		// buffer = response.getBody();
+		setState(CLOSING);
+	}
+
+	if (getState() == BAD) {
 		response.generateErrorPage(request.server, getCode());
-		buffer = response.generateHead();
-		buffer += response.getBody();
 		setState(CLOSING);
 		touch();
 	}
 
+	// std::cout << response.generated << std::endl;
+	std::string		buffer = response.generated.str();
 	send(soc, buffer.c_str(), buffer.length(), MSG_NOSIGNAL);
 	touch();
 }
