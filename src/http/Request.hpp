@@ -51,6 +51,7 @@ class Request
 		bool					isCgiRequest( void ) const;
 		void					routePost( const std::string & );
 		std::string				generateUniqueName( void );
+		std::string				joinPath( const std::string & , const std::string & ) const;
 };
 
 #endif

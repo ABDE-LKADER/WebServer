@@ -55,18 +55,18 @@ void	Connection::requestProssessing( void ) {
 }
 
 void	Connection::reponseProssessing( void ) {
-	try {
-		if (getState() == READY_TO_WRITE) {
+	if (getState() == READY_TO_WRITE) {
+		try {
 			ResponseBuilder		builder(request.server);
 
 			builder.buildResponse(request, response);
 			setState(WRITING); touch();
 		}
+		catch( const State &state ) { status = state; touch(); }
 	}
-	catch( const State &state ) { status = state; touch(); }
 
 	if (getState() == WRITING) {
-		// Api That Cal Function That Will Read The Resonse Body
+		response.continueStreaming();
 		touch();
 	}
 
@@ -74,6 +74,8 @@ void	Connection::reponseProssessing( void ) {
 		response.generateErrorPage(request.server, getCode());
 		setState(CLOSING); touch();
 	}
+
+	if (getState() == CLOSING) return ;
 
 	const char				*buffer = response.generated.c_str();
 	size_t					length = response.generated.length();

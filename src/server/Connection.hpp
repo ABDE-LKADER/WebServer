@@ -30,6 +30,9 @@ class Connection
 		void			reponseProssessing( void );
 		
 	private:
+		Connection( const Connection & );
+		Connection& operator=( const Connection & );
+
 		int				soc;
 		State			status;
 

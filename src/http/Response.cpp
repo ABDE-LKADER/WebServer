@@ -117,30 +117,44 @@ void Response::setContentLength(size_t length) {
 
 void Response::writeStringToBuffer(std::string str) {
     setContentLength(str.length());
-    generateHead();
-    generated += "\r\n" + str;
+    generateHead(); generated += str;
 }
 
-void Response::writeFileToBuffer(std::string full_path) {
-    struct stat s_buffer;
+void Response::continueStreaming( void ) {
+    // struct stat s_buffer;
 
-    if (stat(full_path.c_str(), &s_buffer) != 0) {
-        setContentLength(0);
-        return;
-    }
+    // if (stat(full_path.c_str(), &s_buffer) != 0) {
+    //     setContentLength(0);
+    //     return;
+    // }
 
-    // Set content length before reading
-    setContentLength(s_buffer.st_size);
+    // // Set content length before reading
+    // setContentLength(s_buffer.st_size);
 
-    std::ifstream file(full_path.c_str());
-    if (!file.is_open()) {
-        setContentLength(0);
-        return;
-    }
+    // std::ifstream file(full_path.c_str());
+    // if (!file.is_open()) {
+    //     setContentLength(0);
+    //     return;
+    // }
 
-    char    buffer[BUF_SIZE];
+    // char            buffer[BUF_SIZE];
+    // file.read(buffer, s_buffer.st_size);
+    // generated.append(buffer);
+    // file.close();
 
-    file.read(buffer, s_buffer.st_size);
-    generated.append(buffer);
-    file.close();
+    // one-time: open file stream + headers
+
+    // if (!generated.empty()) return;
+
+    // char            buffer[BUF_SIZE];
+    // struct stat     statusBuffer;
+
+    // if (stat(response.bodyPath.c_str(), &statusBuffer) == -1)
+    //     setCode(500); setState(BAD); return;
+
+    // response.setContentLength(statusBuffer.st_size);
+    // response.generateHead();
+
+    // std::ifstream       file(full_path.c_str());
+    // if (!file.is_open()) throw State(500, BAD);    
 }

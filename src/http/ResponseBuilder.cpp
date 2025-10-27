@@ -7,10 +7,71 @@
 #include <string>
 
 ResponseBuilder::ResponseBuilder(const ServerConfig& config):
-    error_handler (config) {
+    error_handler (config) { }
+
+ResponseBuilder::~ResponseBuilder() { }
+
+void ResponseBuilder::handleCgi(Request& request, Response& response) {
+    CgiHandler cgi_handler(request, request.location);
+    cgi_handler.execute(response);
 }
 
-ResponseBuilder::~ResponseBuilder() {
+void ResponseBuilder::handleAutoIndex(const std::string& path, Response& response) const {
+    std::string listing = generateDirectoryListing(path);
+    response.setStatusCode(200);
+    response.setContentType("text/html");
+    response.writeStringToBuffer(listing);
+}
+
+void ResponseBuilder::handlePost(Response& response) {
+    response.setStatusCode(201);
+    response.setContentLength(0);
+    response.setContentType("text/html");
+    response.generateHead();
+}
+
+void ResponseBuilder::buildResponse(Request& request, Response& response) {
+    if (request.detectRoute == REDIR) {
+        handleRedirect(request, response);
+    }
+
+    if (request.detectRoute == CGI) {
+        handleCgi(request, response);
+    }
+
+    if (request.method == "GET") {
+        handleGet(request, request.location, response);
+    }
+
+    if (request.method == "DELETE") {
+        handleDelete(request.path, response);
+    }
+
+    if (request.method == "POST") {
+        handlePost(response);
+    }
+}
+
+void    ResponseBuilder::handleRedirect(Request& request , Response& response) const {
+    int                 status_code = request.location.getReturn().first;
+    const std::string&  url = request.location.getReturn().second;
+
+    response.setStatusCode(status_code);
+    response.setContentType("text/html");
+    response.setLocation(url);
+
+    std::stringstream body;
+    body << "<!DOCTYPE html><html><head>";
+    body << "<title>Redirect</title>";
+    body << STYLE;
+    body << "</head><body>";
+    body << "<div class=e>";
+    body << "<h1 style=\"font-size:3rem\">Redirecting...</h1>";
+    body << "<hr>";
+    body << "<p>You are being redirected to: <br>" << url << "</p>";
+    body << "</div></body></html>";
+
+    response.writeStringToBuffer(body.str()); throw State(0, WRITING);
 }
 
 std::string ResponseBuilder::generateDirectoryListing(const std::string& path) const {
@@ -27,7 +88,7 @@ std::string ResponseBuilder::generateDirectoryListing(const std::string& path) c
     ss << "<div class=i><a class=parent href=../>../</a></div>";
 
     for (size_t i = 0; i < entries.size(); i++) {
-        bool isDir = (entries[i][entries[i].length() - 1] == '/');
+        bool    isDir = (entries[i][entries[i].length() - 1] == '/');
         ss << "<div class=i><a href=" << entries[i] << ">";
         ss << entries[i] << "</a>";
 
@@ -38,101 +99,7 @@ std::string ResponseBuilder::generateDirectoryListing(const std::string& path) c
     }
 
     ss << "</div></div></body></html>";
-
     return ss.str();
-}
-
-void ResponseBuilder::handleAutoIndex(const std::string& path, Response& response) const {
-    std::string listing = generateDirectoryListing(path);
-    response.setStatusCode(200);
-    response.setContentType("text/html");
-    response.writeStringToBuffer(listing);
-}
-
-void ResponseBuilder::buildResponse(Request& request, Response& response) {
-    if (request.detectRoute == REDIR) {
-        handleRedirect(request.location.getReturn().first, request.location.getReturn().second, response);
-        throw State(0, WRITING);
-    }
-
-    if (request.detectRoute == CGI) {
-        handleCgi(request, response);
-        return ;
-    }
-
-    if (request.method == "GET") {
-        handleGet(request, request.location, response);
-    } else if (request.method == "DELETE") {
-        handleDelete(request.path, response);
-    } else if (request.method == "POST") {
-        response.setStatusCode(201);
-        response.setContentLength(0);
-        response.setContentType("text/html");
-    }
-}
-
-void ResponseBuilder::handleRedirect(int status_code, const std::string& url, Response& response) const {
-    response.setStatusCode(status_code);
-    response.setContentType("text/html");
-    response.setLocation(url);
-
-    std::stringstream body;
-    body << "<!DOCTYPE html><html><head>";
-    body << "<title>Redirect</title>";
-    body << STYLE;
-    body << "</head><body>";
-    body << "<div class=e>";
-    body << "<h1 style=\"font-size:3rem\">Redirecting...</h1>";
-    body << "<hr>";
-    body << "<p>You are being redirected to: <br>" << url << "</p>";
-    body << "</div></body></html>";
-
-    response.writeStringToBuffer(body.str());
-}
-
-void ResponseBuilder::handleGet(const Request& request, const Location& location, Response& response) {
-    const std::string full_path = request.path;
-
-    // Check if path exists
-    if (!static_handler.fileExists(full_path)) {
-        throw State(404, BAD);
-    }
-
-    // Check if it's a directory
-    if (static_handler.isDirectory(full_path)) {
-        // Try to serve index file if configured
-        if (!location.getIndex().empty()) {
-            std::string index_path = full_path;
-            if (index_path[index_path.length() - 1] != '/') {
-                index_path += "/";
-            }
-            index_path += location.getIndex();
-            if (static_handler.fileExists(index_path) && !static_handler.isDirectory(index_path)) {
-                response.setStatusCode(200);
-                response.setContentType(static_handler.getContentType(index_path));
-                // TODO: optimize to avoid set head twice
-                response.writeFileToBuffer(index_path);
-                throw State(0, CLOSING);
-            }
-        }
-
-        // Check if auto_index is enabled
-        if (location.getAutoIndex()) {
-            handleAutoIndex(full_path, response);
-            return;
-        } else {
-            throw State(403, BAD);
-        }
-    }
-
-    // Check if not readable
-    if (!static_handler.isReadable(full_path)) {
-        throw State(403, BAD);
-    }
-
-    response.setStatusCode(200);
-    response.setContentType(static_handler.getContentType(full_path));
-    response.writeFileToBuffer(full_path);
 }
 
 void ResponseBuilder::handleDelete(const std::string& full_path, Response& response) {
@@ -146,16 +113,50 @@ void ResponseBuilder::handleDelete(const std::string& full_path, Response& respo
         throw State(403, BAD);
     }
 
+    
     if (static_handler.deleteFile(full_path)) {
         response.setStatusCode(204);
         response.setContentType("text/html");
         response.setContentLength(0);
-    } else {
-        throw State(500, BAD);
     }
+    
+    else throw State(500, BAD);
 }
 
-void ResponseBuilder::handleCgi(Request& request, Response& response) {
-    CgiHandler cgi_handler(request, request.location);
-    cgi_handler.execute(response);
+void ResponseBuilder::handleGet(const Request& request, const Location& location, Response& response) {
+    std::string   target = request.path;
+
+    // Check if path exists
+    if (!static_handler.fileExists(target)) {
+        throw State(404, BAD);
+    }
+
+    // Check if it's a directory
+    if (static_handler.isDirectory(target)) {
+        const std::string   index_path = request.joinPath(target, location.getIndex());
+
+        // Check for index file
+        if (!location.getIndex().empty() && static_handler.fileExists(index_path)
+                && !static_handler.isDirectory(index_path)) {
+            target = index_path;
+        }
+    
+        // Handle autoindex
+        else if (location.getAutoIndex()) {
+            handleAutoIndex(target, response); return;
+        }
+
+        // No index file and autoindex disabled
+        else throw State(403, BAD);
+    }
+
+    // Check if not readable
+    if (!static_handler.isReadable(target)) {
+        throw State(403, BAD);
+    }
+
+    // Serve the static file
+    response.setContentType(static_handler.getContentType(target));
+    response.setStatusCode(200);
+    throw State(0, WRITING);
 }
