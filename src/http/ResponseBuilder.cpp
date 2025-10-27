@@ -115,7 +115,7 @@ void ResponseBuilder::handleGet(const Request& request, const Location& location
                 response.setResponseLine(200);
                 response.setContentType(static_handler.getContentType(index_path));
                 response.writeFileToBuffer(index_path);
-                return;
+                throw State(0, CLOSING);
             }
         }
 

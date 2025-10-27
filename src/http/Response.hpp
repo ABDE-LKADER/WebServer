@@ -3,7 +3,9 @@
 
 # include "Core.hpp"
 # include "ErrorHandler.hpp"
-# include "ServerConfig.hpp"
+// # include "ServerConfig.hpp"
+
+class ServerConfig;
 
 class Response {
 private:
@@ -12,8 +14,6 @@ private:
     std::string                         status_message;
     std::map<std::string, std::string>  headers;
 
-    //NOTE: This string is here for testing purposes in practise I'll write directly 
-    // to the buffer
     size_t                              total_size;
 
 public:
@@ -31,17 +31,16 @@ public:
     int                     getStatusCode() const;
     const std::string&      getStatusMessage() const;
     size_t                  getTotalSize() const;
+    std::string             to_string(int code);
 
-    std::stringstream       generated;
-    std::string getBody() const;
+    void                    generateErrorPage(const ServerConfig &server, int code);
+    static                  std::string getStatusText(int code);
+    void                    setContentLength(size_t length);
+    void                    writeFileToBuffer(std::string full_path);
 
-    // std::string     generateHead() const;
-    void            generateErrorPage(const ServerConfig &server, int code);
-    static          std::string getStatusText(int code);
-    void            setContentLength(size_t length);
-    void            writeFileToBuffer(std::string full_path);
     // This now also sets the "Content-Lenght"
-    void            writeStringToBuffer(std::string str);
+    void                    writeStringToBuffer(std::string str);
+    std::string            generated;
 };
 
 #endif

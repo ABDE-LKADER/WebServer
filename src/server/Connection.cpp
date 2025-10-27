@@ -61,21 +61,15 @@ void	Connection::reponseProssessing( void ) {
 
 	try {
 
-		if (getState() != BAD) {
-			if (getState() == READY_TO_WRITE) {
-				ResponseBuilder		builder(request.server);
-				builder.buildResponse(request, response);
-			}
+		if (getState() != BAD && getState() == READY_TO_WRITE) {
+			ResponseBuilder		builder(request.server);
+			builder.buildResponse(request, response);
 			touch();
 		}
+
 	}
 
 	catch( const State &state ) { status = state; touch(); }
-
-	if (getState() == WRITING) {
-		// buffer = response.getBody();
-		setState(CLOSING);
-	}
 
 	if (getState() == BAD) {
 		response.generateErrorPage(request.server, getCode());
@@ -83,8 +77,8 @@ void	Connection::reponseProssessing( void ) {
 		touch();
 	}
 
+	std::string	&generated = response.generated;
 	// std::cout << response.generated << std::endl;
-	std::string		buffer = response.generated.str();
-	send(soc, buffer.c_str(), buffer.length(), MSG_NOSIGNAL);
+	send(soc, generated.c_str(), generated.length(), MSG_NOSIGNAL);
 	touch();
 }

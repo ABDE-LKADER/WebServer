@@ -6,10 +6,21 @@ Response::Response() : http_version("HTTP/1.0") { }
 Response::~Response() {
 }
 
+std::string Response::to_string(int code) {
+    std::stringstream   ss;
+    return ss << code, ss.str();
+}
+
 void Response::setResponseLine(int code) {
     status_code = code;
     status_message = getStatusText(code);
-    generated << http_version << status_code << " " << status_message << "\r\n";
+
+    generated.append(http_version)
+             .push_back(' ');
+    generated.append(to_string(status_code))
+             .push_back(' ');
+    generated.append(status_message)
+             .append("\r\n");
 }
 
 void Response::setStatusMessage(const std::string& message) {
@@ -21,7 +32,9 @@ const std::string&      Response::getStatusMessage() const {
 }
 
 void Response::setContentType(const std::string& type) {
-    generated << "Content-Type: " << type << "\r\n";
+    generated.append("Content-Type: ")
+             .append(type)
+             .append("\r\n");
 }
 
 void Response::setHeader(const std::string& name, const std::string& value) {
@@ -65,9 +78,9 @@ void Response::generateErrorPage(const ServerConfig &server, int code) {
 //     return ss.str();
 // }
 
-std::string Response::getBody() const {
-    return generated;
-}
+// std::string Response::getBody() const {
+//     return generated;
+// }
 
 int Response::getStatusCode() const {
     return status_code;
@@ -107,13 +120,17 @@ std::string Response::getStatusText(int code) {
 }
 
 void Response::setContentLength(size_t length) {
-    generated << "Content-Length: " << length << "\r\n";
+    generated.append("Content-Length: ")
+             .append(to_string(length))
+             .append("\r\n")
+             .append("\r\n");
+
+    std::cout << GR "[ Response Line Set ] \n" RS << generated;
 }
 
 void Response::writeStringToBuffer(std::string str) {
     setContentLength(str.length());
-    generated << "\r\n";
-    generated << str;
+    generated += "\r\n" + str;
 }
 
 void Response::writeFileToBuffer(std::string full_path) {
@@ -135,9 +152,9 @@ void Response::writeFileToBuffer(std::string full_path) {
     char    buffer[BUF_SIZE];
 
     // Reserve space in the string to avoid reallocations
-    generated.resize(s_buffer.st_size);
+    // generated.resize(s_buffer.st_size);
 
     file.read(buffer, s_buffer.st_size);
-    generated << buffer;
+    generated.append(buffer);
     file.close();
 }
