@@ -22,7 +22,6 @@ private:
 	char**              env;
 	char**              args;
 	
-	std::string         output_file;  // Path to CGI output file
 	int                 output_fd;    // File descriptor for output file
 
 	std::string         getCgiExecutable(const std::string& file_path) const;
