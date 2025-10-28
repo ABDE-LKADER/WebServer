@@ -34,7 +34,7 @@ class Request
 
 		int						cgiFd;
 		std::string				cgiPath;
-		post_e					detectRoute;
+		route_e					detectRoute;
 
 		MimeResolver			extMime;
 		StaticFileHandler		fileHandler;

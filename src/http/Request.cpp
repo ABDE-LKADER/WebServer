@@ -1,9 +1,9 @@
 # include "Request.hpp"
 
-Request::Request( void ) : content_length(0), detectRoute(NONE) { }
+Request::Request( void ) : content_length(0), detectRoute(RT_NONE) { }
 
 Request::Request( ServerConfig &serv ) : server(serv), content_length(0),
-		detectRoute(NONE) { }
+		detectRoute(RT_NONE) { }
 
 Request::~Request( void ) { }
 
@@ -104,11 +104,11 @@ bool	Request::isCgiRequest( void ) const {
 }
 
 void	Request::routePost( const std::string &longestM ) {
-	detectRoute = UPLOAD;
-	if (detectRoute == CGI)
+	detectRoute = RT_UPLOAD;
+	if (detectRoute == RT_CGI)
 		cgiPath = joinPath(location.getUploadLocation(), generateUniqueName());
 	else if (location.getUpload() == true) {
-		detectRoute = UPLOAD;
+		detectRoute = RT_UPLOAD;
 		path = target.substr(longestM.size());
 		path = joinPath(location.getUploadLocation(), path);
 
@@ -129,12 +129,12 @@ void	Request::startProssessing( void ) {
 	else throw State(404, BAD);
 
 	if (hit->second.getReturn().first) {
-		detectRoute = REDIR; throw State(0, READY_TO_WRITE);
+		detectRoute = RT_REDIR; throw State(0, READY_TO_WRITE);
 	}
 
 	if (!isMethodAllowed()) throw State(405, BAD);
 
-	if (isCgiRequest()) detectRoute = CGI;
+	if (isCgiRequest()) detectRoute = RT_CGI;
 
 	if (method != "POST") {
 		path = target.substr(longestM.size());
@@ -161,8 +161,8 @@ void	Request::streamBodies( void ) {
 	std::string		filePath;
 	size_t			to_write;
 
-	if (detectRoute == CGI) filePath = cgiPath;
-	else if (detectRoute == UPLOAD) filePath = path;
+	if (detectRoute == RT_CGI) filePath = cgiPath;
+	else if (detectRoute == RT_UPLOAD) filePath = path;
 	else throw State(500, BAD); 
 
 	if ((to_write = std::min(recv.size(), content_length)) > 0) {
@@ -177,10 +177,10 @@ void	Request::streamBodies( void ) {
 	}
 
 	if (content_length == 0) {
-		if (detectRoute == CGI && (cgiFd = open(filePath.c_str(), O_RDONLY)) == -1)
+		if (detectRoute == RT_CGI && (cgiFd = open(filePath.c_str(), O_RDONLY)) == -1)
 			throw State(500, BAD);
 
-		if (detectRoute == CGI) std::remove(filePath.c_str());
+		if (detectRoute == RT_CGI) std::remove(filePath.c_str());
 		throw State(0, READY_TO_WRITE);
 	}
 }

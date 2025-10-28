@@ -72,11 +72,11 @@ enum cgi_e {
 	CGI_END
 };
 
-enum post_e {
-	NONE,
-	UPLOAD,
-	REDIR,
-	CGI
+enum route_e {
+	RT_NONE,
+	RT_UPLOAD,
+	RT_REDIR,
+	RT_CGI
 };
 
 enum res_e {
@@ -103,10 +103,5 @@ class State {
 		short			code;
 		state_e			state;
 };
-
-// class Core {
-// 	public:
-// 		static time_t			nowTime( void );
-// };
 
 #endif

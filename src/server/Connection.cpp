@@ -1,6 +1,6 @@
 # include "Connection.hpp"
 
-Connection::Connection( void ) : soc(-1), status(0, REQUEST_LINE),
+Connection::Connection( void ) : soc(ERROR), status(0, REQUEST_LINE),
 		last_active(std::time(NULL)) { }
 
 Connection::Connection( int conn_sock, ServerConfig &server ) : soc(conn_sock),
@@ -29,7 +29,9 @@ void	Connection::sending( void ) {
 	size_t			to_send = std::min(response.generated.size(), (size_t)BUF_SIZE);
 
 	ssize_t			readed = send(soc, buffer, to_send, MSG_NOSIGNAL); touch();
+
 	if (readed > 0) { response.generated.erase(0, to_send); return ; }
+	if (readed == ERROR && (errno == EAGAIN || errno == EWOULDBLOCK)) return ;
 
 	setCode(500); setState(BAD); touch();
 }

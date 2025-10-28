@@ -31,12 +31,12 @@ void ResponseBuilder::handlePost(Response& response) {
 }
 
 void ResponseBuilder::buildResponse(Request& request, Response& response) {
-	if (request.detectRoute == REDIR) {
+	if (request.detectRoute == RT_REDIR) {
 		handleRedirect(request, response);
 	}
 
-	if (request.detectRoute == CGI) {
-		handleCgi(request, response);
+	if (request.detectRoute == RT_CGI) {
+		response.cgiHandler.execute(response);
 	}
 
 	if (request.method == "GET") {
