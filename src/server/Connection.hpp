@@ -28,7 +28,8 @@ class Connection
 
 		void			requestProssessing( void );
 		void			reponseProssessing( void );
-		
+		void			sending( void );
+
 	private:
 		Connection( const Connection & );
 		Connection& operator=( const Connection & );

@@ -36,7 +36,7 @@ public:
     void                    generateErrorPage(const ServerConfig &server, int code);
     static                  std::string getStatusText(int code);
     void                    setContentLength(size_t length);
-    void                    continueStreaming( void );
+    bool                    continueStreaming( void );
 
     // This now also sets the "Content-Lenght"
     void                    generateHead();

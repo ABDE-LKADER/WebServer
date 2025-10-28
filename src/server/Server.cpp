@@ -56,8 +56,8 @@ void	Server::accept_connection( int sock ) {
 }
 
 void	Server::check_timeouts( void ) {
-	time_t			now = Core::nowTime();
-	
+	time_t			now = std::time(NULL);
+
 	for (std::map<int, Connection *>::iterator loop = connections.begin();
 		loop != connections.end(); ++loop) {
 

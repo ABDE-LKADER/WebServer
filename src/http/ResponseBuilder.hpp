@@ -11,7 +11,6 @@ class ResponseBuilder {
 private:
     ErrorHandler                error_handler;
     StaticFileHandler           static_handler;
-    // bool                        redir;
 
 public:
     ResponseBuilder(const ServerConfig& config);
