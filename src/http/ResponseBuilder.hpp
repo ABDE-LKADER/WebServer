@@ -24,7 +24,7 @@ public:
     void	    handleAutoIndex(const std::string& path, Response& response) const;
     void	    handleGet(const Request& request, const Location& location, Response& response);
     void	    handleDelete(const std::string& full_path, Response& response);
-    void	    handleCgi(Request& request, Response& response);
+    void        handleCgi(Request& request, Response& response);
     void        handlePost(Response& response);
 };
 

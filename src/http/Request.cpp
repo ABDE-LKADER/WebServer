@@ -18,6 +18,28 @@ bool	Request::isMethodAllowed( void ) {
 	return false;
 }
 
+bool	Request::isCgiRequest( void ) const {
+	size_t							dot_pos;
+	std::string						extension;
+
+	if ((dot_pos = target.find_last_of(".")) == std::string::npos)
+		return false;
+
+	extension = target.substr(dot_pos);
+	return location.getCgi().find(extension) != location.getCgi().end();
+}
+
+std::string	Request::generateUniqueName( void ) {
+	std::time_t			wallTime = std::time(NULL);
+	std::clock_t		cpuTicks = std::clock();
+
+	std::ostringstream	orand;
+	orand << "upload_" << wallTime << "_" << cpuTicks
+		<< extMime.getExtension(content_type);
+
+	return orand.str();
+}
+
 std::string	Request::joinPath ( const std::string &root, const std::string &target ) const {
 	if (root.empty()) return target;
 	if (target.empty()) return root;
@@ -52,17 +74,6 @@ std::string	Request::longestPrefixMatch( void ) {
 	return longest;
 }
 
-std::string	Request::generateUniqueName( void ) {
-	std::time_t			wallTime = std::time(NULL);
-	std::clock_t		cpuTicks = std::clock();
-
-	std::ostringstream	orand;
-	orand << "upload_" << wallTime << "_" << cpuTicks
-		<< extMime.getExtension(content_type);
-
-	return orand.str();
-}
-
 void	Request::isValidHeaders( void ) {
 	if (headers.find("transfer-encoding") != headers.end())
 		throw State(400, BAD);
@@ -90,17 +101,6 @@ void	Request::isValidHeaders( void ) {
 	if (headerIter == headers.end()) throw State(400, BAD);
 
 	content_type = headerIter->second;
-}
-
-bool	Request::isCgiRequest( void ) const {
-	size_t							dot_pos;
-	std::string						extension;
-
-	if ((dot_pos = target.find_last_of(".")) == std::string::npos)
-		return false;
-
-	extension = target.substr(dot_pos);
-	return location.getCgi().find(extension) != location.getCgi().end();
 }
 
 void	Request::routePost( const std::string &longestM ) {

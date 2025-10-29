@@ -82,8 +82,6 @@ void	Connection::reponseProssessing( void ) {
 	std::cout << RD "Connection::reponseProssessing State: " << getState()
 			<< RS << std::endl;
 
-	std::cout << response.file.rdbuf() << std::endl;
-
 	if (getState() == WRITING) {
 		if (response.continueStreaming() && response.generated.empty()) {
 			setState(CLOSING); touch(); return ;

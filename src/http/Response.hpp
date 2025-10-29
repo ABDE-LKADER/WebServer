@@ -41,10 +41,9 @@ public:
     void                    generateHead();
     void                    writeStringToBuffer(std::string str);
 
-	std::fstream			file;
     std::string             generated;
     std::fstream            bodyStream;
-	CgiHandler              cgi_handler;
+	CgiHandler              cgiHandler;
 };
 
 #endif

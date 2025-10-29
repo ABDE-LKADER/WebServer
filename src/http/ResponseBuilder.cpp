@@ -25,13 +25,39 @@ void ResponseBuilder::handlePost(Response& response) {
 	response.generateHead();
 }
 
+void	ResponseBuilder::handleCgi(Request& request, Response& response) {
+	switch (response.cgiHandler.getStatus()) {
+
+	case CGI_INIT:
+		std::cout << GR "Handling CGI for request: " RS
+					<< request.target << std::endl;
+		response.cgiHandler.execute(request);
+		response.cgiHandler.setStatus(CGI_PROSSESS);
+		break;
+
+	case CGI_PROSSESS:
+		std::cout << GR "Processing CGI for request: " RS
+					<< request.target << std::endl;
+		response.cgiHandler.checkProcess(response);
+		response.cgiHandler.setStatus(CGI_END);
+		break;
+
+	case CGI_END:
+		std::cout << GR "Finalizing CGI for request: " RS
+					<< request.target << std::endl;
+		response.cgiHandler.processOutput(response);
+		break;
+	}
+
+}
+
 void ResponseBuilder::buildResponse(Request& request, Response& response) {
 	if (request.detectRoute == RT_REDIR) {
 		handleRedirect(request, response);
 	}
 
 	else if (request.detectRoute == RT_CGI) {
-		response.cgi_handler.execute(request, response);
+		handleCgi(request, response);
 	}
 
 	else if (request.method == "GET") {

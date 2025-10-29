@@ -22,9 +22,10 @@ private:
 
 	char**              env;
 	char**              args;
-	
-	int                 output_fd;    // File descriptor for output file
+
 	std::string			output_file;
+	std::string			cgi_output;
+	std::fstream		readFile;
 
 	size_t				getCgiFileLength(const std::string pathToCgiFile, size_t headSize) const;
 	std::string         getCgiExecutable(Location& location, const std::string& file_path) const;
@@ -39,8 +40,12 @@ public:
 	CgiHandler();
 	~CgiHandler();
 
-	std::string			cgi_output;
-	void                execute(Request& request, Response& response);
+	cgi_e               getStatus() const;
+	void				setStatus(cgi_e status);
+
+	void                execute(Request& request);
+	void				checkProcess(Response& response);
+	void                processOutput(Response& response);
 };
 
 #endif
