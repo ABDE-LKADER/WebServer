@@ -192,13 +192,9 @@ void    CgiHandler::checkProcess(Response &response) {
     }
 
     std::remove(output_file.c_str());
-    std::cout << RD "CGI script executed successfully, reading output from " RS
-                << readFile << std::endl;
 }
 
 void    CgiHandler::processOutput(Response& response) {
-    std::cout << GR "Processing CGI output for PID: " RS
-                << pid << std::endl;
 
     // Read CGI output
     char buffer[CGI_BUFFER];
@@ -209,8 +205,6 @@ void    CgiHandler::processOutput(Response& response) {
     bytes_read = static_cast<size_t>(readFile.gcount());
 
     cgi_output.append(buffer, bytes_read);
-    std::cout << RD "OUTPUT FROM CGI:\n" RS
-                << cgi_output << std::endl;
 
     (void)bytes_read;
     // response.cgi_offset += bytes_read;
@@ -265,9 +259,6 @@ void CgiHandler::execute(Request& request) {
     
     // Generate output filename BEFORE forking so both parent and child have it
     output_file = generateOutputFilename();
-    
-    std::cout << GR "CGI output will be written to: " RS
-                << output_file << std::endl;
 
     // Fork and execute CGI
     pid = fork();
@@ -320,8 +311,6 @@ void CgiHandler::execute(Request& request) {
         exit(EXIT_FAILURE);
     }
 
-    std::cout << GR "Forked CGI process with PID: " RS
-                << pid << std::endl;
     // ==================== PARENT PROCESS ====================
     // Close the input fd if it was for POST
     if (request.method == "POST" && request.cgiFd != -1) {

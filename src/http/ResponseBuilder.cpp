@@ -29,22 +29,16 @@ void	ResponseBuilder::handleCgi(Request& request, Response& response) {
 	switch (response.cgiHandler.getStatus()) {
 
 	case CGI_INIT:
-		std::cout << GR "Handling CGI for request: " RS
-					<< request.target << std::endl;
 		response.cgiHandler.execute(request);
 		response.cgiHandler.setStatus(CGI_PROSSESS);
 		break;
 
 	case CGI_PROSSESS:
-		std::cout << GR "Processing CGI for request: " RS
-					<< request.target << std::endl;
 		response.cgiHandler.checkProcess(response);
 		response.cgiHandler.setStatus(CGI_END);
 		break;
 
 	case CGI_END:
-		std::cout << GR "Finalizing CGI for request: " RS
-					<< request.target << std::endl;
 		response.cgiHandler.processOutput(response);
 		break;
 	}
