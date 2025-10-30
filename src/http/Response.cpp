@@ -3,6 +3,9 @@
 Response::Response() : http_version("HTTP/1.0") { }
 
 Response::~Response() {
+	if (!cgiFilePath.empty()) {
+		std::remove(cgiFilePath.c_str());
+	}
 }
 
 std::string Response::to_string(int code) {
@@ -116,21 +119,20 @@ std::string Response::getStatusText(int code) {
 }
 
 bool Response::continueStreaming(void) {
-	std::cout << "continueStreaming ..." << std::endl;
-
 	size_t		have = generated.size();
 	if (have >= BUF_SIZE) return false;
 
 	if (!bodyStream.is_open()) return generated.empty();
 
 	size_t		need = BUF_SIZE - have;
-	char		buf[BUF_SIZE];
+	char		*buf = new char[need];
 
 	bodyStream.read(buf, static_cast<std::streamsize>(need));
-	std::streamsize		len = bodyStream.gcount();
+	size_t		len = static_cast<size_t>(bodyStream.gcount());
 
-	if (len > 0) { generated.append(buf, static_cast<size_t>(len)); }
+	if (len > 0) generated.append(buf, len);
 
+	delete[] buf;
 	if (bodyStream.eof()) bodyStream.close();
 	return (!bodyStream.is_open() && generated.empty());
 }

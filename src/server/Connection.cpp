@@ -43,6 +43,7 @@ void	Connection::requestProssessing( void ) {
 
 	try {
 		if (!buffer) throw State(500, BAD);
+
 		if ((len = recv(soc, buffer, BUF_SIZE, 0)) <= 0) {
 			if (len == 0) setState(CLOSING);
 			throw State(0, getState());

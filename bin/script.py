@@ -3,7 +3,7 @@
 import os
 import sys
 
-print("Content-Type: text/html\r\n\r\n")
+print("Content-Type: text/html\r\n\r")
 print("<html><head><title>CGI Test</title></head><body>")
 print("<h1>Hello from python CGI!</h1>")
 print("<p>This is a simple Python CGI script.</p>")

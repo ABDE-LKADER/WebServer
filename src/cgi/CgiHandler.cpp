@@ -1,4 +1,4 @@
-#include "Core.hpp"
+# include "Core.hpp"
 # include "CgiHandler.hpp"
 # include "Response.hpp"
 
@@ -50,6 +50,23 @@ char** CgiHandler::buildArguments() const {
     args[1] = NULL;
     args[2] = NULL;
     return args;
+}
+
+void    CgiHandler::manageCgifds(const char *file, int oflags, int to_fd) {
+    int fd = open(file, oflags, 0644);
+
+    if (fd == -1) {
+        perror("open file for cgi");
+        exit(EXIT_FAILURE);
+    }
+
+    if (dup2(fd, to_fd) == -1) {
+        perror("dup2");
+        close(fd);
+        exit(EXIT_FAILURE);
+    }
+
+    close(fd);
 }
 
 void CgiHandler::freeEnvArray(char** env) const {
@@ -182,16 +199,15 @@ void    CgiHandler::checkProcess(Response &response) {
         throw State(500, BAD);
     }
 
-    // Open and read the entire file
-    readFile.open(output_file.c_str(), std::ios::binary);
+    // Open the CGI output file
     response.bodyStream.open(output_file.c_str(), std::ios::binary);
 
-    if (!response.bodyStream.is_open() || !readFile.is_open()) {
+    if (!response.bodyStream.is_open()) {
         throw State(500, BAD);
     }
-
+    
     setStatus(CGI_END);
-
+    response.cgiFilePath = output_file;
     throw State(0, READY_TO_WRITE);
 }
 
@@ -199,8 +215,9 @@ void CgiHandler::processOutput(Response& response) {
     char *buffer = new char[CGI_BUFFER];
     size_t bytes_read;
 
-    readFile.read(buffer, CGI_BUFFER);
-    bytes_read = static_cast<size_t>(readFile.gcount());
+    // Read from bodyStream into buffer
+    response.bodyStream.read(buffer, CGI_BUFFER);
+    bytes_read = static_cast<size_t>(response.bodyStream.gcount());
     cgi_output.append(buffer, bytes_read);
 
     delete[] buffer;
@@ -208,22 +225,34 @@ void CgiHandler::processOutput(Response& response) {
     // Check for header delimiter
     std::string delimiter = "\r\n\r\n";
     size_t header_end = cgi_output.find(delimiter);
-    
+
     if (header_end == std::string::npos) {
         delimiter = "\n\n";
         header_end = cgi_output.find(delimiter);
     }
-    
-    // If we FOUND the delimiter , process headers
+
+    // If we FOUND the delimiter, process headers
     if (header_end != std::string::npos) {
-        response.cgi_offset = header_end;
+        // Extract headers from cgi_output
+        std::string headers = cgi_output.substr(0, header_end);
+        header_end += delimiter.length();
+
         response.setStatusCode(200);  // Default status
-        parseHeaders(cgi_output, response);
-        
-        size_t con_len = getCgiFileLength(output_file, header_end + delimiter.size());
+        parseHeaders(headers, response);
+
+        // Seek bodyStream to position after headers (start of body content)
+        response.bodyStream.clear(); // Clear any EOF or error flags
+        response.bodyStream.seekg(header_end, std::ios::beg);
+
+        size_t con_len = getCgiFileLength(output_file, header_end);
         response.setContentLength(con_len);
         response.generateHead();
         throw State(0, WRITING);
+    }
+
+    // Check if we've reached EOF without finding headers
+    if (response.bodyStream.eof()) {
+        throw State(500, BAD);
     }
 
     if (cgi_output.size() == 0) {
@@ -277,19 +306,10 @@ void CgiHandler::execute(Request& request) {
             }
             close(request.cgiFd);
         }
-        // Create output file using the member variable
-        int out_fd = open(output_file.c_str(), 
-                            O_WRONLY | O_CREAT | O_TRUNC, 0644);
-        if (out_fd == -1) {
-            perror("open output file");
-            exit(EXIT_FAILURE);
-        }
-        if (dup2(out_fd, STDOUT_FILENO) == -1) {
-            perror("dup2 stdout");
-            close(out_fd);
-            exit(EXIT_FAILURE);
-        }
-        close(out_fd);
+
+        manageCgifds("./.objects/error_cgi.log", O_WRONLY | O_CREAT | O_APPEND, STDERR_FILENO);
+        manageCgifds(output_file.c_str(), O_WRONLY | O_CREAT | O_TRUNC, STDOUT_FILENO);
+
         // Change to script directory
         std::string script_dir = script_path.substr(0, script_path.find_last_of('/'));
         if (!script_dir.empty()) {
@@ -298,6 +318,7 @@ void CgiHandler::execute(Request& request) {
                 exit(EXIT_FAILURE);
             }
         }
+
         // Get script filename only (no path)
         std::string script_filename = script_path.substr(script_path.find_last_of('/') + 1);
         // Build final arguments: [interpreter, script_name, NULL]

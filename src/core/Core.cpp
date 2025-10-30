@@ -4,12 +4,12 @@
 # include "ServerConfig.hpp"
 
 int	main( int argc, char **argv ) {
-	try {
-		if (argc > 2) {
-			std::cerr << "Usage: " << *argv << " [configuration file]" << std::endl;
-			return EXIT_FAILURE;
-		}
+	if (argc > 2) {
+		std::cerr << "Usage: " << *argv << " [configuration file]" << std::endl;
+		return EXIT_FAILURE;
+	}
 
+	try {
 		std::string		configFile("./conf/basic.conf");
 		if (argc == 2) configFile = argv[1];
 

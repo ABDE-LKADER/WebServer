@@ -34,12 +34,12 @@ private:
 	void                freeEnvArray(char** env) const;
 	void                parseHeaders(std::string& cgi_output, Response& response) const;
 	std::string         generateOutputFilename() const;
+	void				manageCgifds(const char *file, int oflags, int to_fd);
 
 public:
 	CgiHandler();
 	~CgiHandler();
 
-	std::ifstream		readFile;
 	cgi_e               getStatus() const;
 	void				setStatus(cgi_e status);
 

@@ -14,6 +14,9 @@ for var in $(compgen -e | sort); do
     fi
 done
 
+# do infinite loop to test timeout
+# while true; do :; done
+
 echo "</ul>"
 echo "<h2>Request Method:</h2>"
 echo "<p>${REQUEST_METHOD:-Unknown}</p>"
@@ -28,3 +31,6 @@ if [ "$REQUEST_METHOD" = "POST" ]; then
 fi
 
 echo "</body></html>"
+
+# Test error, Traceback should be logged in .objects/error_log_cgi.log
+# error

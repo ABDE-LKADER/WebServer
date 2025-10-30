@@ -105,6 +105,7 @@ void	Server::run( void )
 		if ((nfds = epoll_wait(epfd, events, MAX_EVENTS, TIMEOUT)) == ERROR)
 			throw std::runtime_error("<epoll_wait> " + std::string(strerror(errno)));
 
+		check_timeouts();
 		for (int curr_ev = 0; curr_ev < nfds; curr_ev++) {
 			int			curr_sock = events[curr_ev].data.fd;
 
@@ -134,6 +135,5 @@ void	Server::run( void )
 				close_connection(curr_sock); continue ;
 			}
 		}
-		check_timeouts();
 	}
 }

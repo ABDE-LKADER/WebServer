@@ -19,8 +19,6 @@ public:
     Response();
     ~Response();
 
-	size_t					cgi_offset;
-
     void					setStatusCode(int code);
     void					setStatusMessage(const std::string& message);
     void					setContentType(const std::string& type);
@@ -42,8 +40,9 @@ public:
     void                    writeStringToBuffer(std::string str);
 
     std::string             generated;
-    std::ifstream            bodyStream;
+    std::ifstream           bodyStream;
 	CgiHandler              cgiHandler;
+	std::string             cgiFilePath;
 };
 
 #endif
