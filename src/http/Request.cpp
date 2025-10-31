@@ -104,8 +104,12 @@ void	Request::isValidHeaders( void ) {
 }
 
 void	Request::routePost( const std::string &longestM ) {
-	if (detectRoute == RT_CGI)
-		cgiPath = joinPath(location.getUploadLocation(), generateUniqueName());
+	if (detectRoute == RT_CGI) {
+		path = target.substr(longestM.size());
+		path = joinPath(location.getRoot(), path);
+		cgiPath = joinPath("/tmp/", generateUniqueName());
+	}
+
 	else if (location.getUpload() == true) {
 		detectRoute = RT_UPLOAD;
 		path = target.substr(longestM.size());
@@ -116,6 +120,7 @@ void	Request::routePost( const std::string &longestM ) {
 
 		if (fileHandler.fileExists(path)) fileHandler.deleteFile(path);
 	}
+
 	else throw State(403, BAD);
 }
 

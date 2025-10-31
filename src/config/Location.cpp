@@ -1,6 +1,6 @@
 #include "Location.hpp"
 
-Location::Location() : upload(false) {
+Location::Location() : auto_index(false), upload(false) {
 }
 
 Location::~Location() {
