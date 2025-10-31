@@ -22,13 +22,11 @@ echo "<h2>Request Method:</h2>"
 echo "<p>${REQUEST_METHOD:-Unknown}</p>"
 
 if [ "$REQUEST_METHOD" = "POST" ]; then
-    echo "<h2>POST Data:</h2>"
-    CONTENT_LENGTH=${CONTENT_LENGTH:-0}
-    if [ "$CONTENT_LENGTH" -gt 0 ]; then
-        POST_DATA=$(head -c "$CONTENT_LENGTH")
-        echo "<pre>$POST_DATA</pre>"
-    fi
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        echo "$line<br>"
+    done
 fi
+
 
 echo "</body></html>"
 
