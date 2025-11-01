@@ -191,6 +191,8 @@ void	RequestParser::headersParser( Request &request ) {
 	std::string			DCRLF("\r\n\r\n");
 	size_t				pos;
 
+	if (!request.recv.rfind("\r\n", 0)) return ;
+
 	if ((pos = request.recv.find(DCRLF)) == std::string::npos) {
 		if (request.recv.size() > MAX_HEADER_BYTES) throw State(431, BAD);
 		throw State(0, READING_HEADERS);

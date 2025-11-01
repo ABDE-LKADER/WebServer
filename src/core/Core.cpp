@@ -3,6 +3,8 @@
 # include "ConfigParser.hpp"
 # include "ServerConfig.hpp"
 
+volatile sig_atomic_t Core::g_stop = 0;
+
 int	main( int argc, char **argv ) {
 	if (argc > 2) {
 		std::cerr << "Usage: " << *argv << " [configuration file]" << std::endl;
@@ -10,6 +12,8 @@ int	main( int argc, char **argv ) {
 	}
 
 	try {
+		signal(SIGINT, Core::onSignal);
+
 		std::string		configFile("./conf/basic.conf");
 		if (argc == 2) configFile = argv[1];
 

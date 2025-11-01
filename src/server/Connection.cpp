@@ -7,7 +7,7 @@ Connection::Connection( void ) : soc(ERROR), status(0, REQUEST_LINE),
 Connection::Connection( int conn_sock, ServerConfig &server ) : soc(conn_sock),
 		status(0, REQUEST_LINE), request(server), last_active(std::time(NULL)) { }
 
-Connection::~Connection( void ) { }
+Connection::~Connection( void ) { close(soc); }
 
 int	Connection::getSoc( void ) { return soc; }
 
@@ -33,10 +33,9 @@ void	Connection::sending( void ) {
 
 	ssize_t			readed = send(soc, buffer, to_send, MSG_NOSIGNAL); touch();
 
-	if (readed > 0) { response.generated.erase(0, to_send); return ; }
-	if (readed == ERROR && (errno == EAGAIN || errno == EWOULDBLOCK)) return ;
-
-	setCode(500); setState(BAD); touch();
+	if (readed > 0) { response.generated.erase(0, static_cast<size_t>(readed)); }
+	else if (readed == ERROR && (errno == EAGAIN || errno == EWOULDBLOCK)) { }
+	else { setCode(500); setState(BAD); touch(); }
 }
 
 void	Connection::requestProssessing( void ) {

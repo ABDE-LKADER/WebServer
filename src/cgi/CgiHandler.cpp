@@ -8,12 +8,8 @@ CgiHandler::CgiHandler() : script_path(""), cgi_executable(""),
 }
 
 CgiHandler::~CgiHandler() {
-    if (args) {
-        freeEnvArray(args);
-    }
-    if (env) {
-        freeEnvArray(env);
-    }
+    if (args) { freeEnvArray(args); }
+    if (env) { freeEnvArray(env); }
 }
 
 cgi_e CgiHandler::getStatus() const {
@@ -189,11 +185,13 @@ void    CgiHandler::checkProcess(Response &response) {
     int         status;
     time_t      curr_time = std::time(NULL);
 
+    response.cgiFilePath = output_file;
+
     // Check for timeout
     if (curr_time - start_time >= CGI_TIMEOUT) {
         kill(pid, SIGKILL);
         waitpid(pid, &status, 0);
-        throw State(500, BAD);
+        throw State(504, BAD);
     }
 
     // Non-blocking check if child has terminated
@@ -222,7 +220,6 @@ void    CgiHandler::checkProcess(Response &response) {
     }
     
     setStatus(CGI_END);
-    response.cgiFilePath = output_file;
     throw State(0, READY_TO_WRITE);
 }
 

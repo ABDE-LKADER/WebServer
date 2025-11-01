@@ -52,8 +52,12 @@ typedef std::vector< std::pair<std::string, std::string> >	vector_pairs;
 # define BUF_SIZE			(32 * 1024)
 # define MAX_EVENTS			1024
 
-# ifndef TIMEOUT
-#  define TIMEOUT 10
+# ifndef INACTIVITY_TIMEOUT_S
+#  define INACTIVITY_TIMEOUT_S 10
+# endif
+
+# ifndef EPOLL_TIMEOUT_MS
+#  define EPOLL_TIMEOUT_MS 1000
 # endif
 
 # define MAX_REQUEST_LINE	1024
@@ -94,6 +98,16 @@ class State {
 
 		short			code;
 		state_e			state;
+};
+
+class Core {
+	public:
+		static volatile	sig_atomic_t g_stop;
+
+		static void		onSignal( int ) {
+			g_stop = true;
+			write(STDERR_FILENO, "\r\033[K", 4);
+		}
 };
 
 #endif

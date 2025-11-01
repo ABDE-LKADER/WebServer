@@ -2,10 +2,21 @@
 
 Server::Server( void ) : epfd(ERROR) { }
 
-Server::~Server( void ) {
-	for (std::map<int, ServerConfig>::iterator curr = listeners.begin();
-			curr != listeners.end(); curr++)
-		close(curr->first);
+Server::~Server() {
+	for (std::map<int, Connection *>::iterator loop = connections.begin();
+		loop != connections.end(); ++loop) {
+		epoll_ctl(epfd, EPOLL_CTL_DEL, loop->first, NULL);
+		delete loop->second;
+	}
+	connections.clear();
+
+	for (std::map<int, ServerConfig>::iterator loop = listeners.begin();
+		loop != listeners.end(); ++loop) {
+		epoll_ctl(epfd, EPOLL_CTL_DEL, loop->first, NULL);
+		close(loop->first);
+	}
+	listeners.clear();
+
 	if (epfd != ERROR) close(epfd);
 }
 
@@ -32,7 +43,6 @@ void	Server::close_connection( int sock ) {
 	epoll_ctl(epfd, EPOLL_CTL_DEL, sock, NULL);
 	delete connections.find(sock)->second;
 	connections.erase(sock);
-	close(sock);
 }
 
 void	Server::socket_control( int fd, int mode, int op ) {
@@ -41,9 +51,8 @@ void	Server::socket_control( int fd, int mode, int op ) {
 	bzero(&ev, sizeof(event_t));
 	ev.events = mode, ev.data.fd = fd;
 
-	if (epoll_ctl(epfd, op, ev.data.fd, &ev) == ERROR)
-		throw std::runtime_error("<epoll_ctl> " + std::string(strerror(errno)));
-}		
+	epoll_ctl(epfd, op, ev.data.fd, &ev);
+}
 
 void	Server::accept_connection( int sock ) {
 	int		conn_sock = accept(sock, NULL, NULL);
@@ -65,7 +74,7 @@ void	Server::check_timeouts( void ) {
 		if (conn->getState() == BAD || conn->getState() == CLOSING
 			|| conn->getRoute() == RT_CGI ) continue;
 
-		if (now - conn->getLastActive() >= TIMEOUT) {
+		if (now - conn->getLastActive() >= INACTIVITY_TIMEOUT_S) {
 			conn->setCode(408); conn->setState(BAD);
 			socket_control(conn->getSoc(), EPOLLOUT, EPOLL_CTL_MOD);
 		}
@@ -102,10 +111,13 @@ void	Server::create( const std::vector<ServerConfig> &servers ) {
 void	Server::run( void )
 {
 	std::cout << GR "[SUCCESS] Server started successfully!" RS << std::endl;
+	std::cout << YL "[COMMAND] Press Ctrl+C to stop the server." RS << std::endl;
 
-	while ( true ) {
-		if ((nfds = epoll_wait(epfd, events, MAX_EVENTS, TIMEOUT)) == ERROR)
-			throw std::runtime_error("<epoll_wait> " + std::string(strerror(errno)));
+	while ( !Core::g_stop ) {
+		nfds = epoll_wait(epfd, events, MAX_EVENTS, EPOLL_TIMEOUT_MS);
+
+		if (nfds == -1 && errno == EINTR) continue ;
+		if (nfds == -1) throw std::runtime_error("<epoll_wait> " + std::string(strerror(errno)));
 
 		check_timeouts();
 		for (int curr_ev = 0; curr_ev < nfds; curr_ev++) {
