@@ -132,25 +132,50 @@ char** CgiHandler::buildEnvVariables (Request& request) const {
     env_strings.push_back("REQUEST_METHOD=" + request.method);
     env_strings.push_back("SCRIPT_FILENAME=" + script_path);
     env_strings.push_back("SCRIPT_NAME=" + request.target);
+
+    // env_strings.push_back("PATH_INFO=");
+    // env_strings.push_back("PATH_TRANSLATED=" + script_path);
+    // env_strings.push_back("REQUEST_URI=" + request.target);
+    // env_strings.push_back("SERVER_SOFTWARE=webserv/1.0");
+
     env_strings.push_back("QUERY_STRING=" + request.query);
     env_strings.push_back("SERVER_PROTOCOL=" + request.version);
     env_strings.push_back("GATEWAY_INTERFACE=CGI/1.1");
+    env_strings.push_back("REDIRECT_STATUS=200");
+    
     const std::pair<std::string, std::string>& listen = request.server.getListen()[0];
     env_strings.push_back("SERVER_NAME=" + listen.first);
     env_strings.push_back("SERVER_PORT=" + listen.second);
+
+    // env_strings.push_back("REMOTE_ADDR=" + listen.first);
+    // env_strings.push_back("REMOTE_PORT=" + listen.second);
+
     if (request.method == "POST") {
         std::stringstream ss;
         ss << request.content_length;
         env_strings.push_back("CONTENT_LENGTH=" + ss.str());
     }
+
     // Content-type from headers
     map_s::const_iterator content_type = request.headers.find("content-type");
     if (content_type != request.headers.end()) {
         env_strings.push_back("CONTENT_TYPE=" + content_type->second);
     }
+
+    // Handle Cookie header specially for PHP session management
+    map_s::const_iterator cookie_it = request.headers.find("cookie");
+    if (cookie_it != request.headers.end()) {
+        env_strings.push_back("COOKIE=" + cookie_it->second);
+        env_strings.push_back("HTTP_COOKIE=" + cookie_it->second);
+    }
+
     for (map_s::const_iterator it = request.headers.begin(); 
     it != request.headers.end(); ++it) {
         std::string header_name = it->first;
+
+        // Skip cookie as we already handled it
+        if (header_name == "cookie") continue;
+
         // Convert to uppercase and replace - with _
         for (size_t i = 0; i < header_name.length(); ++i) {
             header_name[i] = std::toupper(static_cast<unsigned char>(header_name[i]));
@@ -294,8 +319,8 @@ void CgiHandler::execute(Request& request) {
     if (access(script_path.c_str(), F_OK) != 0) {
         throw State(404, BAD);
     }
-    // Check if script is executable
-    if (access(script_path.c_str(), X_OK) != 0) {
+    // Check if script is readable (not executable - interpreters handle execution)
+    if (access(script_path.c_str(), R_OK) != 0) {
         throw State(403, BAD);
     }
     // Build environment variables and arguments
@@ -326,21 +351,11 @@ void CgiHandler::execute(Request& request) {
         manageCgifds("./.objects/error_cgi.log", O_WRONLY | O_CREAT | O_APPEND, STDERR_FILENO);
         manageCgifds(output_file.c_str(), O_WRONLY | O_CREAT | O_TRUNC, STDOUT_FILENO);
 
-        // Change to script directory
-        std::string script_dir = script_path.substr(0, script_path.find_last_of('/'));
-        if (!script_dir.empty()) {
-            if (chdir(script_dir.c_str()) != 0) {
-                perror("chdir");
-                exit(EXIT_FAILURE);
-            }
-        }
-
-        // Get script filename only (no path)
-        std::string script_filename = script_path.substr(script_path.find_last_of('/') + 1);
-        // Build final arguments: [interpreter, script_name, NULL]
+        // Build arguments: [interpreter, script_path, NULL]
+        // Use full absolute path since we're not changing directory
         char* exec_args[3];
         exec_args[0] = args[0];
-        exec_args[1] = const_cast<char*>(script_filename.c_str());
+        exec_args[1] = const_cast<char*>(script_path.c_str());
         exec_args[2] = NULL;
         // Execute the CGI script
         execve(cgi_executable.c_str(), exec_args, env);
