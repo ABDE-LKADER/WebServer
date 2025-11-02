@@ -45,6 +45,7 @@ $serverAddr = getenv('SERVER_ADDR') ?: getenv('SERVER_NAME') ?: 'N/A';
 $serverPort = getenv('SERVER_PORT') ?: 'N/A';
 $connection = $serverAddr . ':' . $serverPort;
 ?>
+
 <!DOCTYPEhtml>
 <html lang="en">
 <head>

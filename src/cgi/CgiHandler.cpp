@@ -130,7 +130,7 @@ char** CgiHandler::buildEnvVariables (Request& request) const {
     std::vector<std::string> env_strings;
 
     env_strings.push_back("REQUEST_METHOD=" + request.method);
-    env_strings.push_back("SCRIPT_FILENAME=" + script_path);
+    env_strings.push_back("SCRIPT_FILENAME=." + request.target);
     env_strings.push_back("SCRIPT_NAME=" + request.target);
 
     // env_strings.push_back("PATH_INFO=");
@@ -311,7 +311,7 @@ void CgiHandler::processOutput(Response& response) {
 void CgiHandler::execute(Request& request) {
     script_path = request.path;
     cgi_executable = getCgiExecutable(request.location, script_path);
-
+    
     if (cgi_executable.empty()) {
         throw State(500, BAD);
     }
@@ -323,17 +323,17 @@ void CgiHandler::execute(Request& request) {
     if (access(script_path.c_str(), R_OK) != 0) {
         throw State(403, BAD);
     }
+
     // Build environment variables and arguments
     env = buildEnvVariables(request);
     args = buildArguments();
-    
+
     // Generate output filename BEFORE forking so both parent and child have it
     output_file = generateOutputFilename();
 
     // Fork and execute CGI
     pid = fork();
     if (pid < 0) {
-        // Fork failed
         throw State(500, BAD);
     }
 
@@ -348,15 +348,27 @@ void CgiHandler::execute(Request& request) {
             close(request.cgiFd);
         }
 
-        manageCgifds("./.objects/error_cgi.log", O_WRONLY | O_CREAT | O_APPEND, STDERR_FILENO);
+        manageCgifds("./.objects/.error_cgi.log", O_WRONLY | O_CREAT | O_APPEND, STDERR_FILENO);
         manageCgifds(output_file.c_str(), O_WRONLY | O_CREAT | O_TRUNC, STDOUT_FILENO);
+
+        // Change to script directory
+        // size_t  slPos = script_path.find_last_of('/');
+        size_t  last_slash_pos = script_path.find_last_of('/');
+        std::string script_dir = script_path.substr(0, last_slash_pos);
+        if (!script_dir.empty()) {
+            if (chdir(script_dir.c_str()) != 0) {
+                perror("chdir");
+                exit(EXIT_FAILURE);
+            }
+        }
+
+        // Get script filename only (no path)
+        std::string script_filename = script_path.substr(last_slash_pos + 1);
 
         // Build arguments: [interpreter, script_path, NULL]
         // Use full absolute path since we're not changing directory
-        char* exec_args[3];
-        exec_args[0] = args[0];
-        exec_args[1] = const_cast<char*>(script_path.c_str());
-        exec_args[2] = NULL;
+        char* exec_args[3] = { args[0], const_cast<char*>(script_filename.c_str()), NULL };
+
         // Execute the CGI script
         execve(cgi_executable.c_str(), exec_args, env);
         perror("execve");
