@@ -1,65 +1,13 @@
-# 🌐 HTTP: C++ Web Server
+# HTTP: C++ Web Server
 
 This project is an implementation of the **webserv** subject from **42 School**.  
 It is a lightweight HTTP/1.0 server written in C++98, using **epoll** for a single non-blocking event loop.
 
-📄 You can find the original subject [here](./docs/Subject.md).
+You can find the original subject [here](./docs/Subject.md).
 
 ---
 
-## 📂 Project Structure
-
-```plaintext
-webserv/
-├─ Makefile
-├─ conf/                    # config files
-│  └─ basic.conf
-├─ www/                     # static files for tests
-├─ errors/                  # default error pages (html)
-├─ bin/                     # simple CGI scripts (python, etc.)
-└─ src/
-   ├─ config/
-   │  ├─ ServerConfig.hpp / .cpp    # parse config file → in-memory model
-   │  ├─ ConfigParser.hpp / .cpp    # parse config file → in-memory model
-   │  └─ Location.hpp / .cpp        # ServerBlock, Location, etc.
-   ├─ http/
-   │  ├─ Request.hpp / .cpp         # HTTP request structure + helpers
-   │  ├─ RequestParser.hpp / .cpp   # parse start-line, headers, body (HTTP/1.0)
-   │  ├─ Response.hpp / .cpp        # HTTP response (status, headers, body)
-   │  └─ ResponseBuilder.hpp / .cpp # build raw response with Content-Length
-   ├─ cgi/
-   │  ├─ CgiRunner.hpp / .cpp       # fork+exec, env, pipes (non-blocking)
-   │  └─ CgiAdapter.hpp / .cpp      # map Request → CGI → Response
-   ├─ server/
-   │  ├─ Server.hpp / .cpp          # epoll loop, listeners, connection map
-   │  ├─ Listener.hpp / .cpp        # bind/listen (non-blocking)
-   │  ├─ Connection.hpp / .cpp      # per-client state machine
-   │  └─ Buffer.hpp / .cpp          # safe read/write buffers
-   └─ Core/
-      ├─ Router.hpp / .cpp          # choose handler (static/upload/delete/cgi)
-      ├─ Handlers.hpp / .cpp        # Static/Upload/Delete/AutoIndex
-      └─ Core.cpp                   # glue: wire everything together
-
-NB: Structure Changeable
-````
-
----
-
-## 👥 Team Responsibilities
-
-* **Mehdi** → `config/` + `http/Response.*`
-  *(Config parsing, server rules, and building HTTP responses)*
-
-* **Abdelkader** → `server/` + `http/Request.*`
-  *(Epoll loop, connections, and HTTP request parsing)*
-
-> ⚠️ **Note:**
-> **CGI** is a **shared responsibility** → both teammates must understand it.
-> Whichever teammate finishes their main part first will take the lead on implementing CGI.
-
----
-
-## 🚀 Features (HTTP/1.0 scope)
+## Features (HTTP/1.0 scope)
 
 * Single non-blocking **epoll** loop for all I/O
 * Supports **GET**, **POST** (uploads), and **DELETE**
@@ -72,8 +20,8 @@ NB: Structure Changeable
 
 ---
 
-## 🛠️ Build & Run
+## Build & Run
 
 ```bash
-    make && ./webserv conf/webserv.conf
+    make && ./webserv
 ```
