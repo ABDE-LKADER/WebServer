@@ -37,7 +37,7 @@ finish:
 
 setup:
 	@echo $(YELOW)🔄 Initializing Submodule...$(RESET)
-	@git submodule update --init --recursive
+	@git submodule update --init
 	@echo $(GREEN)🔗 Creating Symlinks...$(RESET)
 	@for link in $(LINKS); do \
 		if [ ! -L $$link ] && [ ! -d $$link ]; then \
@@ -47,6 +47,7 @@ setup:
 			echo "   ⚠️  $$link already exists (skipping)"; \
 		fi \
 	done
+	@ln -sf WebServDash/favicon.ico WebServDash/www/favicon.ico
 
 $(NAME): $(OBJS)
 	@mkdir -p uploads
